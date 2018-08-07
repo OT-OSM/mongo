@@ -1,5 +1,5 @@
 ---
-  - hosts: mongo_master,mongo_slave
+  - hosts: all
     roles:
       - mongodb
     become: true

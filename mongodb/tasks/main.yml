@@ -22,26 +22,28 @@
   template:
     src: mongodb_replica.j2
     dest: /etc/mongod.conf
-  notify:
-    - mongo_restart
 
+- name: Restart mongo
+  systemd:
+    name: mongod
+    state: restarted
 
-- hosts: mongo_master
-  name: Create a file to Initialize replication
+- name: Create a file to Initialize replication
   template: src=repset_init.j2 dest=/tmp/repset_init.js
+  when: inventory_hostname in groups['mongo_master']
 
-- hosts: mongo_master
-  name: Initialize the replication set
+- name: Initialize the replication set
   shell: /usr/bin/mongo /tmp/repset_init.js
+  when: inventory_hostname in groups['mongo_master']
 
 
-- hosts: mongo_slave
-  name: Create a file to set slave
+- name: Create a file to set slave
   template: src=set_slave.j2 dest=/tmp/set_slave.js
+  when: inventory_hostname in groups['mongo_slave']
 
-- hosts: mongo_slave
-  name: Check Slave ok
+- name: Check Slave ok
   shell: /usr/bin/mongo /tmp/set_slave.js
+  when: inventory_hostname in groups['mongo_slave']
 
 
 
