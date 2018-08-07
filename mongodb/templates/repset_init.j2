@@ -1,0 +1,7 @@
+rs.initiate()
+sleep(2000)
+{% for host in groups['replication_servers'] %}
+rs.add("{{ host }}:27017")
+sleep(2000)
+{% endfor %}
+printjson(rs.status())

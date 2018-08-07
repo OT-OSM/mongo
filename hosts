@@ -1,0 +1,9 @@
+[mongo_master]
+10.0.6.231 server_name=mongo_master
+
+
+[mongo_slave]
+10.0.8.157 server_name=master_slave
+
+[replication_servers]
+mongo-slave1
