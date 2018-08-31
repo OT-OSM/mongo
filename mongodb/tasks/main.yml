@@ -21,6 +21,7 @@
   systemd:
     name: mongod
     state: started
+    enabled: yes
 
 - name: Create a file to Initialize replication
   template: src=repset_init.j2 dest=/tmp/repset_init.js
