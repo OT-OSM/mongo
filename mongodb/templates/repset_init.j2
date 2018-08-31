@@ -1,7 +1,7 @@
 rs.initiate()
 sleep(10000)
-rs.add("mongo-slave.internal-mongodb.com.:27017")
+rs.add("{{ slave_dns }}:{{ mongo_port }}")
 sleep(2000)
-rs.addArb("mongo-arbiter.internal-mongodb.com.:27017");
+rs.addArb("{{ arbiter_dns }}:{{ mongo_port }}");
 sleep(2000)
 printjson(rs.status())

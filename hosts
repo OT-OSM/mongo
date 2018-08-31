@@ -1,8 +1,13 @@
+
+
 [mongo_master]
-10.0.8.173
 
 [mongo_slave]
-10.0.5.14
 
 [mongo_arbiter]
-10.0.12.64
+
+
+[mongo:children]
+mongo_master
+mongo_slave
+mongo_arbiter

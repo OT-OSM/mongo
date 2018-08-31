@@ -5,28 +5,22 @@
   template:
     src: mongodb_repo.j2
     dest: /etc/yum.repos.d/mongodb-org.repo
-  become: yes
 
 - name: Install mongodb
   yum:
     name: mongodb-org
     state: present
-  become: yes
 
-- name: start mongo
-  systemd:
-    name: mongod
-    state: started
 
 - name: Enable replication in mongodb
   template:
     src: mongodb_replica.j2
     dest: /etc/mongod.conf
 
-- name: Restart mongo
+- name: Start mongo
   systemd:
     name: mongod
-    state: restarted
+    state: started
 
 - name: Create a file to Initialize replication
   template: src=repset_init.j2 dest=/tmp/repset_init.js

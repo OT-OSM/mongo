@@ -7,11 +7,11 @@
 systemLog:
   destination: file
   logAppend: true
-  path: /var/log/mongodb/mongod.log
+  path: {{ systemlog_path }}
 
 # Where and how to store data.
 storage:
-  dbPath: /var/lib/mongo
+  dbPath: {{ db_path }}
   journal:
     enabled: true
 #  engine:
@@ -21,13 +21,13 @@ storage:
 # how the process runs
 processManagement:
   fork: true  # fork and run in background
-  pidFilePath: /var/run/mongodb/mongod.pid  # location of pidfile
-  timeZoneInfo: /usr/share/zoneinfo
+  pidFilePath: {{ pidFilePath }} # location of pidfile
+  timeZoneInfo: {{ timeZoneInfo }}
 
 # network interfaces
 net:
-  port: 27017
-  bindIp: 0.0.0.0  # Listen to local interface only, comment to listen on all interfaces.
+  port: {{ mongo_port }}
+  bindIp: {{ bindIp }}  # Listen to local interface only, comment to listen on all interfaces.
 
 
 #security:
@@ -35,7 +35,7 @@ net:
 #operationProfiling:
 
 replication:
-  replSetName: rs1
+  replSetName: {{ replSetName }}
 #sharding:
 
 ## Enterprise-Only Options
