@@ -2,3 +2,12 @@
 # defaults file for mongodb
 
 version: 3.6
+systemlog_path: /var/log/mongodb/mongod.log
+db_path: /var/lib/mongo
+pidFilePath: /var/run/mongodb/mongod.pid
+timeZoneInfo: /usr/share/zoneinfo
+mongo_port: 27017
+replSetName: rs1
+bindIp: 0.0.0.0
+slave_dns: mongo-slave.internal-mongodb.com.
+arbiter_dns: mongo-arbiter.internal-mongodb.com.

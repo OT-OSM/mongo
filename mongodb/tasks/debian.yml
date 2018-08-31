@@ -1,0 +1,47 @@
+---
+# tasks file for mongodb
+
+- name: Add an apt key by id from a keyserver
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 0C49F3730359A14518585931BC711F9BA15703C6
+
+- name: Create a list file for MongoDB
+  shell: echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/{{ version }} main" | sudo tee /etc/apt/sources.list.d/mongodb-org-{{ version }}.list 
+
+- name: Install mongo
+  apt: 
+    name: mongodb-org
+    state: present 
+    update_cache: yes  
+
+- name: Enable replication in mongodb
+  template:
+    src: mongodb_replica.j2
+    dest: /etc/mongod.conf
+
+- name: Start mongo
+  service:
+    name: mongod
+    state: started
+    enabled: yes
+
+- name: Create a file to Initialize replication
+  template: src=repset_init.j2 dest=/tmp/repset_init.js
+  when: inventory_hostname in groups['mongo_master']
+
+- name: Initialize the replication set
+  shell: /usr/bin/mongo /tmp/repset_init.js
+  when: inventory_hostname in groups['mongo_master']
+
+
+- name: Create a file to set slave
+  template: src=set_slave.j2 dest=/tmp/set_slave.js
+  when: inventory_hostname in groups['mongo_slave']
+
+- name: Check Slave ok
+  shell: /usr/bin/mongo /tmp/set_slave.js
+  when: inventory_hostname in groups['mongo_slave']
+
+
+
