@@ -1,11 +1,13 @@
 
 
 [mongo_master]
+34.231.225.1
 
 [mongo_slave]
+34.234.234.139
 
 [mongo_arbiter]
-
+35.170.78.234
 
 [mongo:children]
 mongo_master
