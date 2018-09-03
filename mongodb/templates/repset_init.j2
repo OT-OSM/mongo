@@ -1,7 +1,9 @@
 rs.initiate()
 sleep(10000)
-rs.add("{{ slave_dns }}:{{ mongo_port }}")
+{% for item in slave_dns %}
+rs.add("{{ item }}:{{ mongo_port }}")
 sleep(2000)
+{% endfor %}
 rs.addArb("{{ arbiter_dns }}:{{ mongo_port }}");
 sleep(2000)
 printjson(rs.status())
