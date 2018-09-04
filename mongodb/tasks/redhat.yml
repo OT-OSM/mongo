@@ -4,7 +4,7 @@
 - name: Add Mongodb repo to yum repo
   template:
     src: mongodb_repo.j2
-    dest: /etc/yum.repos.d/mongodb-org.repo
+    dest: /etc/yum.repos.d/mongodb-org.{{ version }}.repo
 
 - name: Install mongodb
   yum:
