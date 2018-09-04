@@ -49,8 +49,11 @@
 
 - name: Initialize the replication set
   shell: /usr/bin/mongo < /tmp/repset_init.js
+  register: rep_initiate
   when: inventory_hostname in groups['mongo_master']
 
+- debug:
+      var: rep_initiate
 
 - name: Create a file to set slave
   template: src=set_slave.j2 dest=/tmp/set_slave.js
@@ -58,4 +61,8 @@
 
 - name: Check Slave ok
   shell: /usr/bin/mongo < /tmp/set_slave.js
+  register: slave_initiate
   when: inventory_hostname in groups['mongo_slave']
+
+- debug:
+      var: slave_initiate
