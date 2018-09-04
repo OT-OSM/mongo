@@ -1,5 +1,5 @@
 rs.initiate()
-sleep(10000)
+sleep(8000)
 {% for item in slave_dns %}
 rs.add("{{ item }}:{{ mongo_port }}")
 sleep(2000)

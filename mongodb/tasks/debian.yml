@@ -47,15 +47,15 @@
   template: src=repset_init.j2 dest=/tmp/repset_init.js
   when: inventory_hostname in groups['mongo_master']
 
-#- name: Initialize the replication set
-#  shell: /usr/bin/mongo < /tmp/repset_init.js
-#  when: inventory_hostname in groups['mongo_master']
+- name: Initialize the replication set
+  shell: /usr/bin/mongo < /tmp/repset_init.js
+  when: inventory_hostname in groups['mongo_master']
 
 
 - name: Create a file to set slave
   template: src=set_slave.j2 dest=/tmp/set_slave.js
   when: inventory_hostname in groups['mongo_slave']
 
-#- name: Check Slave ok
-#  shell: /usr/bin/mongo < /tmp/set_slave.js
-#  when: inventory_hostname in groups['mongo_slave']
+- name: Check Slave ok
+  shell: /usr/bin/mongo < /tmp/set_slave.js
+  when: inventory_hostname in groups['mongo_slave']
