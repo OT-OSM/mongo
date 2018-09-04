@@ -16,3 +16,4 @@
 # HOW TO RUN
 
   - by default ansible-playbook -i hosts site.yml
+  - ansible-playbook -i hosts --extra-vars '{"slave_dns":["a.com","b.com","cl.com"]}' site.yml
