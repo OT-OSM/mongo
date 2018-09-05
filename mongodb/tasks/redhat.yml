@@ -27,6 +27,11 @@
   template: src=repset_init.j2 dest=/tmp/repset_init.js
   when: inventory_hostname in groups['mongo_master']
 
+- name: Create a file to Create Admin user
+  template: src=mongo_adminuser.j2 dest=/tmp/mongo_adminuser.js
+  when: inventory_hostname in groups['mongo_master']
+
+
 - name: Initialize the replication set
   shell: /usr/bin/mongo /tmp/repset_init.js
   register: rep_initiate
@@ -34,6 +39,12 @@
 
 - debug:
       var: rep_initiate
+
+
+- name: Create admin user
+  shell: /usr/bin/mongo < /tmp/mongo_adminuser.js
+  register: create_user
+  when: inventory_hostname in groups['mongo_master']
 
 
 - name: Create a file to set slave
@@ -47,3 +58,8 @@
 
 - debug:
       var: slave_initiate
+
+- name: Enable authorization
+  template:
+    src: mongo_authhorization.j2
+    dest: /etc/mongod.conf

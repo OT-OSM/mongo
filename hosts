@@ -1,13 +1,13 @@
 
 
 [mongo_master]
-34.234.167.8
+18.208.199.191
 
 [mongo_slave]
-34.201.56.18
+35.153.213.30
 
 [mongo_arbiter]
-54.209.17.230
+34.201.49.170
 
 [mongo:children]
 mongo_master

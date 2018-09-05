@@ -27,10 +27,9 @@
     allow_unauthenticated: yes
     update_cache: yes
 
-- name: start mongo
+- name: enable mongo
   service:
     name: mongod
-    state: started
     enabled: yes
 
 - name: Enable replication in mongodb
@@ -66,3 +65,21 @@
 
 - debug:
       var: slave_initiate
+
+
+- name: Create a file to Create Admin user
+  template: src=mongo_adminuser.j2 dest=/tmp/mongo_adminuser.js
+  when: inventory_hostname in groups['mongo_master']
+
+- name: Create admin user
+  shell: /usr/bin/mongo < /tmp/mongo_adminuser.js
+  register: create_user
+  when: inventory_hostname in groups['mongo_master']
+
+- debug:
+      var: create_user
+
+- name: Enable authorization
+  template:
+    src: mongo_authhorization.j2
+    dest: /etc/mongod.conf
