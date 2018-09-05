@@ -9,6 +9,8 @@
   - slave_dns (list variable , can add mutiple slave dns) [by default  mongo-slave.internal-mongodb.com.]
   - slave_no (no of slaves in cluster , by default 1)
   - mongo_port
+  - username (mongo user name)
+  - admin_pwd (mongo user password)
 
 # HOST
   - in host file three groups are there master , slave and arbiter
