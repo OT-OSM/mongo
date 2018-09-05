@@ -63,3 +63,9 @@
   template:
     src: mongo_authhorization.j2
     dest: /etc/mongod.conf
+  when: inventory_hostname in groups['mongo_master']
+
+- name: Restart mongo
+  service:
+    name: mongod
+    state: restarted
