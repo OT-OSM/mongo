@@ -7,7 +7,6 @@
   - version (mongo version , by default 3.6)
   - replSetName (replication set name)
   - slave_dns (list variable , can add mutiple slave dns) [by default  mongo-slave.internal-mongodb.com.]
-  - slave_no (no of slaves in cluster , by default 1)
   - mongo_port
   - username (mongo user name)
   - admin_pwd (mongo user password)

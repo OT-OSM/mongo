@@ -15,6 +15,5 @@ slave_dns:
 arbiter_dns: mongo-arbiter.internal-mongodb.com.
 key_id: 9DA31620334BD75D9DCB49F368818C72E52529D4
 key_server: keyserver.ubuntu.com
-slave_no: 1
 username: admin
 admin_pwd: admin
