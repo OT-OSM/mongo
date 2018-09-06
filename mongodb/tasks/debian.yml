@@ -7,18 +7,8 @@
     id: "{{ key_id }}"
     state: present
 
-- name: Create a list file for MongoDB (trusty)
-  shell: echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/{{ version }} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-{{ version }}.list
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'
-
-- name: Create a list file for MongoDB (xenial)
-  shell: echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/{{ version }} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-{{ version }}.list
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
-
-- name: Create a list file for MongoDB (bionic)
-  shell: echo "deb http://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/{{ version }} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-{{ version }}.list
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '18.04'
-
+- name: Create a list file for MongoDB
+  shell: echo "deb http://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ version }} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-{{ version }}.list
 
 - name: Install mongo
   apt:
@@ -27,17 +17,17 @@
     allow_unauthenticated: yes
     update_cache: yes
 
-- name: enable mongo
+- name: enable mongo so it will restart after every boot
   service:
     name: mongod
     enabled: yes
 
-- name: Enable replication in mongodb
+- name: Copy configuration file for replication in mongodb
   template:
     src: mongodb_replica.j2
     dest: /etc/mongod.conf
 
-- name: Restart mongo
+- name: Restart mongo service
   service:
     name: mongod
     state: restarted
@@ -79,11 +69,12 @@
 - debug:
       var: create_user
 
-- name: Enable authorization
+- name: Enable authorization in mongo
   template:
     src: mongo_authorization.j2
     dest: /etc/mongod.conf
   when: inventory_hostname in groups['mongo_master']
+
 
 - name: Restart mongo
   service:

@@ -11,6 +11,7 @@ replSetName: rs1
 bindIp: 0.0.0.0
 slave_dns:
   - mongo-slave.internal-mongodb.com.
+
 arbiter_dns: mongo-arbiter.internal-mongodb.com.
 key_id: 9DA31620334BD75D9DCB49F368818C72E52529D4
 key_server: keyserver.ubuntu.com

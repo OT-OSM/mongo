@@ -12,12 +12,12 @@
     state: present
 
 
-- name: Enable replication in mongodb
+- name: Copy configuration file for replication in mongodb
   template:
     src: mongodb_replica.j2
     dest: /etc/mongod.conf
 
-- name: Start mongo
+- name: Start mongo service
   systemd:
     name: mongod
     state: started
@@ -59,7 +59,7 @@
 - debug:
       var: slave_initiate
 
-- name: Enable authorization
+- name: Enable authorization in  mongo
   template:
     src: mongo_authhorization.j2
     dest: /etc/mongod.conf
