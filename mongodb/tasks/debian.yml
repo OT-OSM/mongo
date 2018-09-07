@@ -74,9 +74,9 @@
     src: mongo_authorization.j2
     dest: /etc/mongod.conf
   when: inventory_hostname in groups['mongo_master']
+  notify: restart_mongo
 
-
-- name: Restart mongo
-  service:
-    name: mongod
-    state: restarted
+#- name: Restart mongo#
+#  service:
+#    name: mongod
+#    state: restarted
