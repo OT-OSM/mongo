@@ -1,0 +1,5 @@
+---
+  - hosts: mongo
+    roles:
+      - mongodb
+    become: true

@@ -1,0 +1,15 @@
+
+
+[mongo_master]
+master ansible_host=18.213.118.3
+
+[mongo_slave]
+slave ansible_host=18.206.85.239
+
+[mongo_arbiter]
+arbiter ansible_host=18.215.64.145
+
+[mongo:children]
+mongo_master
+mongo_slave
+mongo_arbiter

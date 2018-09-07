@@ -1,0 +1,15 @@
+---
+# tasks file for mongodb
+
+- name: To install mongo on RedHat
+  include_tasks: redhat.yml
+  when:
+    ansible_os_family == 'RedHat'
+
+- name: To install mongo on Debian
+  include_tasks: debian.yml
+  when:
+    ansible_os_family == 'Debian'
+
+
+

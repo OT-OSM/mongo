@@ -1,0 +1,5 @@
+use admin
+
+sleep(2000)
+
+db.createUser({user: "{{ username }}" , pwd: "{{ admin_pwd }}" ,roles: [ { role: "userAdminAnyDatabase", db: "admin"} ]})
