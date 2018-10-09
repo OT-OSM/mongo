@@ -19,10 +19,10 @@ storage:
 #  wiredTiger:
 
 # how the process runs
-#processManagement:
-#  fork: true  # fork and run in background
-#  pidFilePath: {{ pidFilePath }} # location of pidfile
-#  timeZoneInfo: {{ timeZoneInfo }}
+processManagement:
+  fork: true  # fork and run in background
+  pidFilePath: {{ pidFilePath }} # location of pidfile
+  timeZoneInfo: {{ timeZoneInfo }}
 
 # network interfaces
 net:
