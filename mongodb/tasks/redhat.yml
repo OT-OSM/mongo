@@ -61,7 +61,7 @@
 
 - name: Enable authorization in  mongo
   template:
-    src: mongo_authhorization.j2
+    src: mongo_authorization.j2
     dest: /etc/mongod.conf
   when: inventory_hostname in groups['mongo_master']
   notify: restart_mongo
