@@ -11,7 +11,7 @@ systemLog:
 
 # Where and how to store data.
 storage:
-  dbPath: {{ db_path }}
+  dbPath: {{ db_path_ubuntu }}
   journal:
     enabled: true
 #  engine:
@@ -19,10 +19,10 @@ storage:
 #  wiredTiger:
 
 # how the process runs
-processManagement:
-  fork: true  # fork and run in background
-  pidFilePath: {{ pidFilePath }} # location of pidfile
-  timeZoneInfo: {{ timeZoneInfo }}
+#processManagement:
+ # fork: true  # fork and run in background
+  #pidFilePath: {{ pidFilePath }} # location of pidfile
+  #timeZoneInfo: {{ timeZoneInfo }}
 
 # network interfaces
 net:
@@ -30,8 +30,8 @@ net:
   bindIp: {{ bindIp }}  # Listen to local interface only, comment to listen on all interfaces.
 
 
-#security:
-#    authorization:
+security:
+    authorization: enabled
 
 #operationProfiling:
 

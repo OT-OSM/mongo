@@ -24,7 +24,7 @@
 
 - name: Copy configuration file for replication in mongodb
   template:
-    src: mongodb_replica.j2
+    src: mongodb_replica_ubuntu.j2
     dest: /etc/mongod.conf
 
 - name: Restart mongo service
@@ -71,7 +71,7 @@
 
 - name: Enable authorization in mongo
   template:
-    src: mongo_authorization.j2
+    src: mongo_authorization_ubuntu.j2
     dest: /etc/mongod.conf
   when: inventory_hostname in groups['mongo_master']
   notify: restart_mongo

@@ -1,13 +1,13 @@
 
 
 [mongo_master]
-master ansible_host=18.213.118.3
+master ansible_host=34.245.77.60
 
 [mongo_slave]
-slave ansible_host=18.206.85.239
+slave ansible_host=34.247.217.40
 
 [mongo_arbiter]
-arbiter ansible_host=18.215.64.145
+arbiter ansible_host=18.203.135.43
 
 [mongo:children]
 mongo_master

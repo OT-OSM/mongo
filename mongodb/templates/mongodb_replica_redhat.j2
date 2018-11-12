@@ -11,7 +11,7 @@ systemLog:
 
 # Where and how to store data.
 storage:
-  dbPath: {{ db_path }}
+  dbPath: {{ db_path_redhat }}
   journal:
     enabled: true
 #  engine:
@@ -30,8 +30,8 @@ net:
   bindIp: {{ bindIp }}  # Listen to local interface only, comment to listen on all interfaces.
 
 
-security:
-    authorization: enabled
+#security:
+#    authorization:
 
 #operationProfiling:
 
