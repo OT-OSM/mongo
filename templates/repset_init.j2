@@ -1,0 +1,21 @@
+rs.initiate( {
+   _id : "{{ mongo_replSetName }}",
+   members: [
+      { _id: 0, host: "{{ groups['mongo_master'][0] }}:{{ mongo_port }}", priority: {{ master_priority }} },
+   {% set member_id = namespace(value=1) %}
+   {% set slave_count = namespace(value=groups['mongo_slave']|length) %}
+   {% for item in groups['mongo_slave'] %}   
+      { _id: {{ member_id.value }}, host: "{{ item }}:{{ mongo_port }}", priority: {{ slave_priority }} }
+      {% set slave_count.value = slave_count.value - 1 %}
+      {% set member_id.value = member_id.value + 1 %}  
+      {% if slave_count.value > 0 %}
+      ,
+      {%endif%}
+    {% endfor %}
+   ],
+   settings: {
+    mongo_heartbeat_timeout_secs: {{ mongo_heartbeat_timeout_secs }},
+    mongo_election_timeout_millisec : {{ mongo_election_timeout_millisec }}
+  }
+})
+printjson(rs.status())

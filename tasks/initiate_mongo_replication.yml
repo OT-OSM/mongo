@@ -1,0 +1,22 @@
+---
+
+- name: Place replication Initiate script on master node
+  template:
+    src: repset_init.j2
+    dest: /tmp/repset_init.js
+  register: init_replica_set
+  when: inventory_hostname in groups['mongo_master']
+
+- name: Initialize the Replica set
+  shell: /usr/bin/mongo -u {{ mongo_root_admin_name }} -p {{ mongo_root_admin_pwd }} < /tmp/repset_init.js
+  register: rep_initiate
+  when: inventory_hostname in groups['mongo_master']
+  ignore_errors: "yes"
+
+- name: Create Admin users to setup Replication in Mongo
+  include: setup_authentication_mongo.yml
+  when: rep_initiate is failed
+
+- name: Initialize the Replica set
+  shell: /usr/bin/mongo -u {{ mongo_root_admin_name }} -p {{ mongo_root_admin_pwd }} < /tmp/repset_init.js
+  when: inventory_hostname in groups['mongo_master'] and rep_initiate is failed

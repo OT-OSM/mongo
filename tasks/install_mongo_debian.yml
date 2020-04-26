@@ -1,0 +1,39 @@
+---
+- name: Establish some role-related facts
+  set_fact:
+    mongo_major_version: "{{ mongo_version[0:3] }}"
+
+- name: Install dependencies
+  apt:
+    name:
+      - gnupg
+      - python{{ ansible_python['version']['major'] }}-pip
+      - python{{ ansible_python['version']['major'] }}-dev
+      - python{{ ansible_python['version']['major'] }}-setuptools
+    state: present
+    update_cache: yes
+
+- name: Install PyMongo from PIP
+  pip:
+    name: pymongo
+    state: "{{ pymongo_pip_version is defined | ternary('present','latest') }}"
+    version: "{{ pymongo_pip_version | default(omit) }}"
+
+
+- name: Add an apt key by id from a keyserver
+  apt_key:
+    keyserver: "{{ mongo_apt_key_server }}"
+    id: "{{ mongo_apt_key_id[mongo_major_version] }}"
+    state: present
+
+- name: Add MongoDB repo
+  apt_repository:
+    repo: deb {{ mongo_apt_repo_url }} {{ ansible_distribution_release }}/mongodb-org/{{ mongo_major_version }} multiverse
+    filename: mongodb-org-{{ mongo_major_version }}
+    state: present
+
+- name: Install mongodb
+  apt:
+    name: "{{ mongo_package_name }}{% if (mongo_version | length > 3) %}={{ mongo_version }}{% endif %}"
+    state: present
+    update_cache: "yes"

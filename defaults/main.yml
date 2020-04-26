@@ -1,0 +1,82 @@
+---
+# defaults file for mongodb
+
+# Mongo Installation parameters
+mongo_version: "4.2"
+mongo_package_name: mongodb-org
+mongo_apt_repo_url: http://repo.mongodb.org/apt/ubuntu
+mongo_apt_key_id:
+  "3.4": "0C49F3730359A14518585931BC711F9BA15703C6"
+  "3.6": "2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5"
+  "4.0": "9DA31620334BD75D9DCB49F368818C72E52529D4"
+  "4.2": "E162F504A20CDF15827F718D4B7C549A058F8B6B"
+mongo_apt_key_server: keyserver.ubuntu.com
+pymongo_pip_version: 3.7.1
+mongo_redhat_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org
+mongo_redhat_repository:
+  "3.4": "{{ mongo_redhat_url }}/3.4/$basearch/"
+  "3.6": "{{ mongo_redhat_url }}/3.6/$basearch/"
+  "4.0": "{{ mongo_redhat_url }}/4.0/$basearch/"
+  "4.2": "{{ mongo_redhat_url }}/4.2/$basearch/"
+mongo_redhat_repository_gpgkey:
+  "3.4": "https://www.mongodb.org/static/pgp/server-3.4.asc"
+  "3.6": "https://www.mongodb.org/static/pgp/server-3.6.asc"
+  "4.0": "https://www.mongodb.org/static/pgp/server-4.0.asc"
+  "4.2": "https://www.mongodb.org/static/pgp/server-4.2.asc"
+mongo_amazon_url: https://repo.mongodb.org/yum/amazon/2/mongodb-org
+mongo_amazon_repository:
+  "3.4": "{{ mongo_amazon_url }}/3.4/$basearch/"
+  "3.6": "{{ mongo_amazon_url }}/3.6/$basearch/"
+  "4.0": "{{ mongo_amazon_url }}/4.0/$basearch/"
+  "4.2": "{{ mongo_amazon_url }}/4.2/$basearch/"
+yum_lock_timeout: 180
+epel_release_rpm: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+# Mongo Service parameters
+mongo_service_name: mongod
+mongo_service_user: "{{ 'mongodb' if ansible_os_family == 'Debian' else 'mongod' }}"
+mongo_service_group: "{{ 'mongodb' if ansible_os_family == 'Debian' else 'mongod' }}"
+
+# Mongo Configuration parameters
+mongo_systemlog_destination: "file"
+mongo_systemlog_path: /var/log/mongodb/mongod.log
+mongo_db_path: "{{ '/var/lib/mongodb' if ansible_os_family == 'Debian' else '/var/lib/mongo' }}"
+mongo_pid_file_path: /var/run/mongodb/mongod.pid
+mongo_time_zone_info: /usr/share/zoneinfo
+mongo_port: 27017
+mongo_bindIp: localhost
+
+# Mongo Replication parameter
+replication_enabled: false
+mongo_replSetName: repl
+mongo_heartbeat_timeout_secs: 10
+mongo_election_timeout_millisec: 10000
+master_priority: 5
+slave_priority: 1
+
+# Mongo authentication parameter
+authentication_enabled: true
+mongo_user_admin_name: useradmin
+mongo_user_admin_pwd: passw0rd
+mongo_root_admin_name: RootAdmin
+mongo_root_admin_pwd: passw0rd
+mongo_root_backup_name: backupuser
+mongo_root_backup_pwd: passw0rd
+mongo_authentication_keyname: mongo_authentication_key
+mongo_authentication_key: |
+  mCjwxJbrxWC9VPcSFcuxoNh/9iVVXXNVj+R2KAjv0Tw1HsHuEPGzV9lbYlKAOxac
+  bwYdYk0/tvB1TFwe5eOMSqnz2pVX5xrvFYR1t200Z7WvRx/4KvStKQLs1d75EUi2
+  WnKzFXVrHjsDL/KnXGEhfKWH5O8XhLzpkKX7/Bf8R/fgrCT22xJhPvzSKUmC36sz
+  3rewN1/+GGilKe1wraHuozVgboA5qAFCPlXiU9kVLH4dKpb61EpuVRVdyys81oLw
+  J1/zMFZOk/cHbfYVYycmnypfAt5oqH7MXCb93Thax/DQhHZRjbHpCpcczjj6AZgh
+  9GgMJFmGMhTXqvkZmVWTkPKBYSs+6EpEEefwKMb/1RSA5kDF6vVDaSTBCjNYr75N
+  5057B6HFjsqVmANldAJlcrYdDVSk3W/CI6fcT99xZnhrF84gRbUo7wSiQPtX/kb7
+  Lr5MyFM84G9V/AZSF3X2gvNywrpor16Fnt8xB33ueuRQ1opFNI7NFBRcs6AqdyTW
+  Zs12p7Hk20KdsaShl1SaIi9oxm6DPBdueaFxuAVHETZtN5uBTuvmLTiGgGFoL3kj
+  ATm+bRGIi+iD2pK12M9guso1lAswGY5uU2V4D0q19kmJxAoy8yWE8St3xGh110sE
+  QCyAQGCIbub8t9PnX/RbZXLB+8Q3LZIRlSbQABrgkXonjo+Kc2WH/Pj83gmDpq6E
+  iX9WowqxvGD73vldw0N9yXIoG9qfhtGhlshM0rY8bqDKuJjiNzYS3WbO8fweJ/0I
+  lJwxZoKJ+WIagSg8iKyQdLYxV4Pc5uAbFiY0x8AA7QY+DkP7B3HV/zdMtDgZrvnv
+  CUcJKJgNO9CIFrd6NNE+MV+2iijM+9RVo/7dvYPw/obn6r8yt9Jl/Q97LTcVJxgX
+  TEZVBDY+LLhW8jK1+cvfMe+0Y7SOPPKF4wVVHtu/r5cafO8Jsh17kEgZ9TUn4h9G
+  HxgF3uPTpXar+vq7ScqLHbadZck29N2BNhP/tPOlqSm+QVNF
