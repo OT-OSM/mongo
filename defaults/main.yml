@@ -62,6 +62,7 @@ mongo_root_admin_name: RootAdmin
 mongo_root_admin_pwd: passw0rd
 mongo_root_backup_name: backupuser
 mongo_root_backup_pwd: passw0rd
+mongo_custom_users: None
 mongo_authentication_keyname: mongo_authentication_key
 mongo_authentication_key: |
   mCjwxJbrxWC9VPcSFcuxoNh/9iVVXXNVj+R2KAjv0Tw1HsHuEPGzV9lbYlKAOxac

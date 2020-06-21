@@ -28,8 +28,15 @@
 | mongo_root_admin_name | RootAdmin |  Override default values with your ones|mongo root user name|
 | mongo_root_admin_pwd | passw0rd |  Override default values with your ones|mongo root user password
 | mongo_root_backup_name | backupuser | Override default values with your ones |mongo backup user name|
-| mongo_root_backup_pwd | passw0rd | Override default values with your ones |mongo backup user password
+| mongo_root_backup_pwd | passw0rd | Override default values with your ones |mongo backup user password |
+| mongo_custom_users | None | Can specify multiple users with roles. Please refer below example for the reference |
 |mongo_authentication_key | | Mention your key here. (GPG key) | Authentication key for cluster nodes to communicate with each other securely. |
+
+### Define Multiple users to add in MongoDB
+    mongo_custom_users:
+        - { name: user1 , password: userpwd, roles: admin }
+        - { name: user2 , password: userpwd, roles: backup,clusterMonitor }
+
 
 ## INVENTORY
 

@@ -50,6 +50,19 @@
   run_once: true
   no_log: true
 
+- name: Create user defined users
+  mongodb_user:
+    database: admin
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    update_password: on_create
+    roles: "{{ item.roles }}"
+  with_items:
+    - "{{ mongo_custom_users}}"
+  run_once: true
+  no_log: true
+  when: inventory_hostname in groups['mongo_master'] and mongo_custom_users != "None"
+
 - name: Move back mongod.conf
   template:
     src: mongo_conf.j2
