@@ -1,6 +1,12 @@
 # OSM: MONGODB
 ###### MongoDB ansible role for Standalone , Cluster(Replication) setup with Authentication
 
+Version History
+------------------
+|**Date**| **Version**| **Description**| **Changed By** |
+|----------|---------|---------------|-----------------|
+|**27 June 2020** | v0.0.1 | Initial draft | Rajat Vats |
+
 ### PREREQUISITE
 * ###### NOTHING !!!!
 
