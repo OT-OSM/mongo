@@ -1,0 +1,19 @@
+---
+# tasks file for mongodb
+
+- name: Install Mongodb and depedencies
+  include_tasks: install_mongo_redhat.yml
+
+- name: Setup Mongodb service
+  include_tasks: mongo_service_file_setup.yml
+
+- name: Configure Mongo
+  include_tasks: configure.yml
+
+- name: Initiate Replication
+  include_tasks: initiate_mongo_replication.yml
+  when: replication_enabled
+
+- name: Setup authentication
+  include_tasks: setup_authentication_mongo.yml
+  when: authentication_enabled

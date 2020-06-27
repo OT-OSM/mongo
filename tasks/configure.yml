@@ -1,0 +1,59 @@
+---
+- name: create mongodb group
+  group:
+    name: "{{ mongo_service_group }}"
+    state: present
+
+- name: create mongodb user
+  user:
+    name: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+    state: present
+
+- name: Create systemlog dir if missing
+  file:
+    state: directory
+    dest: "{{ mongo_systemlog_path|dirname }}"
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+    mode: 0755
+  when: mongo_systemlog_destination == "file"
+
+- name: Check systemlog file exists
+  stat: path={{ mongo_systemlog_path }}
+  register: logfile_stat
+  when: mongo_systemlog_destination == "file"
+
+- name: Create systemlog file if missing
+  file:
+    state: touch
+    dest: "{{ mongo_systemlog_path }}"
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+    mode: 0644
+  when: ( mongo_systemlog_destination == "file"
+        and logfile_stat is defined
+        and not logfile_stat.stat.exists )
+
+- name: Place authentication key on each node
+  copy:
+    dest: "/etc/{{ mongo_authentication_keyname }}"
+    content: "{{ mongo_authentication_key }}"
+    mode: '0400'
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+  when: authentication_enabled and replication_enabled
+
+- name: Mongo Configuration Setup
+  template:
+    src: mongo_conf.j2
+    dest: /etc/mongod.conf
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+    mode: 0644
+  notify:
+    - mongodb_restart
+    - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
+
+- name: Flush all handlers at this point
+  meta: flush_handlers

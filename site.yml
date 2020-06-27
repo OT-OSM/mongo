@@ -1,5 +1,6 @@
 ---
-  - hosts: mongo
-    roles:
-      - mongodb
-    become: true
+- hosts: mongo
+  roles:
+    - osm_mongo
+  become: true
+  any_errors_fatal: true
