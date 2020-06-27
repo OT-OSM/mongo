@@ -1,6 +1,4 @@
 ---
-dependencies: []
-
 galaxy_info:
   author: Rajat Vats
   company: Opstree Solutions
@@ -16,3 +14,8 @@ galaxy_info:
         - 7
     - name: Amazon Linux
       version: 2
+  galaxy_tags:
+    - mongo
+    - db
+
+dependencies: []

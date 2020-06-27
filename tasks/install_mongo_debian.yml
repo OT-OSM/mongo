@@ -11,7 +11,7 @@
       - python{{ ansible_python['version']['major'] }}-dev
       - python{{ ansible_python['version']['major'] }}-setuptools
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Install PyMongo from PIP
   pip:
