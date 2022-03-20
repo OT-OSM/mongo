@@ -49,11 +49,13 @@ Version History
 An example inventory could be like this:-
 
 ```ini
+
 [mongo_master]
-34.245.77.60
+prim ansible_ssh_host=3.1.203.248 ansible_user=ubuntu
 
 [mongo_slave]
-34.247.217.40
+sec1 ansible_ssh_host=18.141.201.202 ansible_user=ubuntu
+sec2 ansible_ssh_host=54.169.112.210 ansible_user=ubuntu
 
 [mongo:children]
 mongo_master

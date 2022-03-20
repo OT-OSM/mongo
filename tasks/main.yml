@@ -1,6 +1,9 @@
 ---
 # tasks file for mongodb
 
+- name: Include playbook for mongo os confg
+  include_tasks: prerequiste.yml 
+
 - name: To install mongo on Debian
   include_tasks: debian.yml
   when:
