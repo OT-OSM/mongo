@@ -8,7 +8,15 @@ Version History
 |**27 June 2020** | v0.0.1 | Initial draft | Rajat Vats |
 
 ### PREREQUISITE
-* ###### NOTHING !!!!
+* To use this role we have to make entry of nodes ip in /etc/hosts
+
+```ini
+3.1.x.x primary
+54.169.x.x secondary
+18.141.x.x secondary
+
+```
+
 
 ### OS-SUPPORTED
 * ###### Ubuntu 18
