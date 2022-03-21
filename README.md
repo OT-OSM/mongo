@@ -6,6 +6,7 @@ Version History
 |**Date**| **Version**| **Description**| **Changed By** |
 |----------|---------|---------------|-----------------|
 |**27 June 2020** | v0.0.1 | Initial draft | Rajat Vats |
+|**21 March 2022** | v0.0.2 | Manage node DNS | Kritarth Pant |
 
 ### PREREQUISITE
 * ###### NOTHING !!!!
