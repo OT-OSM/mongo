@@ -9,13 +9,17 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - bionic
-    - name: Centos
+    - name: EL
       versions:
         - 7
-    - name: Amazon Linux
+    - name: Amazon
       version: 2
   galaxy_tags:
+    - opstree
+    - otosm
     - mongo
-    - db
+    - database
+    - devsecops
+    - devops
 
 dependencies: []

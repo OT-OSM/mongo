@@ -2,10 +2,10 @@
 
 A high end ansible role to install and setup standalone MongoDB.
 
-### v0.0.1
-##### June 27, 2020
+### v0.0.2
+##### March 21, 2022
 
-### FEATURES
-* Setup Standalone MongoDB instance
-* Setup Replication over mongodb cluster
-* Setup Authentication with root,admin and backup users.
+#### :tada: New Features
+
+##### [ADD]
+- Manage node hostname from role

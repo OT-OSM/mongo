@@ -51,15 +51,19 @@ An example inventory could be like this:-
 ```ini
 
 [mongo_master]
-prim ansible_ssh_host=3.1.x.x ansible_user=ubuntu
+prim ansible_ssh_host=3.1.x.x
 
 [mongo_slave]
-sec1 ansible_ssh_host=18.141.x.x ansible_user=ubuntu
-sec2 ansible_ssh_host=54.169.x.x ansible_user=ubuntu
+sec1 ansible_ssh_host=18.141.x.x
+sec2 ansible_ssh_host=54.169.x.x 
 
 [mongo:children]
 mongo_master
 mongo_slave
+
+
+[mongo:vars]
+ansible_user=ubuntu
 
 ```
 
