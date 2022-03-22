@@ -6,6 +6,7 @@ Version History
 |**Date**| **Version**| **Description**| **Changed By** |
 |----------|---------|---------------|-----------------|
 |**27 June 2020** | v0.0.1 | Initial draft | Rajat Vats |
+|**21 March 2022** | v0.0.2 | Manage node DNS | Kritarth Pant |
 
 ### PREREQUISITE
 * ###### NOTHING !!!!
@@ -49,15 +50,21 @@ Version History
 An example inventory could be like this:-
 
 ```ini
+
 [mongo_master]
-34.245.77.60
+prim ansible_ssh_host=3.1.x.x
 
 [mongo_slave]
-34.247.217.40
+sec1 ansible_ssh_host=18.141.x.x
+sec2 ansible_ssh_host=54.169.x.x 
 
 [mongo:children]
 mongo_master
 mongo_slave
+
+
+[mongo:vars]
+ansible_user=ubuntu
 
 ```
 
