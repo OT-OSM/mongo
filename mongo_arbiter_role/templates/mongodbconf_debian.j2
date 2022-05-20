@@ -1,0 +1,46 @@
+# mongod.conf
+
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# Where and how to store data.
+storage:
+  dbPath: {{ dbPath }}
+  journal:
+    enabled: true
+#  engine:
+#  mmapv1:
+#  wiredTiger:
+
+# where to write logging data.
+systemLog:
+  destination: file
+  logAppend: true
+  path: {{ logPath }}
+
+# network interfaces
+net:
+  port: {{ port }}
+  bindIp: {{ mongo_bindIp }},{{ ansible_eth0.ipv4.address }}
+  #bindIp: {{ mongo_bindIp }}
+
+
+# how the process runs
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+
+#security:
+
+#operationProfiling:
+
+#replication:
+replication:
+  replSetName: {{ replica_set }}
+
+#sharding:
+
+## Enterprise-Only Options:
+
+#auditLog:
+
+#snmp:

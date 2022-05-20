@@ -1,0 +1,29 @@
+---
+- name: Create user UserAdmin
+  mongodb_user:
+    database: admin
+    name: "{{ username }}"
+    password: "{{ admin_pwd }}"
+    state: present
+    roles: userAdminAnyDatabase
+    roles:
+     - { db: "admin", role: "userAdminAnyDatabase" }
+  when: inventory_hostname in groups['master']
+  run_once: true
+  no_log: true
+
+
+
+- name: Create user RootAdmin
+  mongodb_user:
+    database: admin
+    name: "{{ root_adminuser }}"
+    password: "{{ root_adminpass }}"
+    state: present
+    roles: root
+    roles:
+     - { db: "admin", role: "root" }
+  when: inventory_hostname in groups['master'] 
+  run_once: true
+  no_log: true
+

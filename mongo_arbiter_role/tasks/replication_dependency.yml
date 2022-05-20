@@ -1,0 +1,11 @@
+---
+# This plugin is part of the community.mongodb collection required as the dependency for Mongo Community
+  - name: Install python tools
+    apt:
+      name: python3-pip
+      state: latest
+    when: ansible_os_family == 'Debian'
+
+  - name: pymongo install
+    shell : pip3 install pymongo==3.12.1
+
