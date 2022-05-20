@@ -1,0 +1,9 @@
+---
+- name: Install MongoDB in target machine
+  hosts: mongo
+  gather_facts: yes
+  become: yes
+  roles:
+    - /Osm_mongo_task/mongo-slave_role
+
+

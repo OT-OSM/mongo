@@ -1,0 +1,51 @@
+---
+  
+- name: checking service status
+  command: systemctl status mongod.service     
+  register: result
+  ignore_errors: yes
+
+- name: showing report
+  debug:
+    var: result
+
+- name: Check if service is running by querying the application port
+  wait_for: 
+    port: "{{ mongo_port }}"
+    timeout: 10
+    state: stopped
+    msg: "Port 27017 is accessible, application is already installed and running"
+  register: service_status
+
+- name: print
+  debug:
+    var: service_status  
+
+- name: Import Public Key for Debian
+  apt_key:
+   url: "{{ mongo_key_url }}"
+   state: present
+  
+- name: Adding Repo for Debian
+  apt_repository: 
+   repo: '{{ mongo_dist_type }} {{ mongo_base_url }} {{ mongo_dist_url }}'
+   state: present
+   filename: 'mongodb-org-{{ version }}'
+   update_cache: yes
+
+ 
+
+- name: Installing MongoDB Packages for Debian
+  apt:
+   name: mongodb-org
+   state: present
+
+- name: mongod conf copy
+  template:
+   src: mongodbconf_debian.j2
+   dest: "{{ config_dest }}"
+   owner: "{{ mongo_service_user }}"
+   group: "{{ mongo_service_group }}"
+  notify: restart mongodb service
+
+- meta: flush_handlers

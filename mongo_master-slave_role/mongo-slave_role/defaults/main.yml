@@ -1,0 +1,51 @@
+---
+# defaults file for mongoDB
+
+mongo_key_url: https://www.mongodb.org/static/pgp/server-{{ version }}.asc
+
+mongo_base_url: https://repo.mongodb.org/apt/ubuntu 
+mongo_dist_url: bionic/mongodb-org/{{ version }} multiverse
+mongo_dist_type: deb [ arch=amd64,arm64 ]
+
+# To get The Private IP of The Target Machines
+mongo_master: "{{ hostvars[groups['mongo'][0]]['ansible_eth0']['ipv4']['address'] }}"
+mongo_slave1: "{{ hostvars[groups['mongo'][1]]['ansible_eth0']['ipv4']['address'] }}"
+mongo_slave2: "{{ hostvars[groups['mongo'][2]]['ansible_eth0']['ipv4']['address'] }}"
+
+#default user and group
+mongo_service_user: mongodb
+mongo_service_group: mongodb
+
+
+# for security 
+mongo_bindIp: localhost
+replication_enabled: true
+authentication_enabled: true
+
+#user details
+username: UserAdmin
+admin_pwd: Password@1234
+
+root_adminuser: RootAdmin
+root_adminpass: azqGepX8xn
+
+#key file
+mongo_authentication_keyname: mongo_authentication_key
+mongo_authentication_key: |
+  mCjwxJbrxWC9VPcSFcuxoNh/9iVVXXNVj+R2KAjv0Tw1HsHuEPGzV9lbYlKAOxac
+  bwYdYk0/tvB1TFwe5eOMSqnz2pVX5xrvFYR1t200Z7WvRx/4KvStKQLs1d75EUi2
+  WnKzFXVrHjsDL/KnXGEhfKWH5O8XhLzpkKX7/Bf8R/fgrCT22xJhPvzSKUmC36sz
+  3rewN1/+GGilKe1wraHuozVgboA5qAFCPlXiU9kVLH4dKpb61EpuVRVdyys81oLw
+  J1/zMFZOk/cHbfYVYycmnypfAt5oqH7MXCb93Thax/DQhHZRjbHpCpcczjj6AZgh
+  9GgMJFmGMhTXqvkZmVWTkPKBYSs+6EpEEefwKMb/1RSA5kDF6vVDaSTBCjNYr75N
+  5057B6HFjsqVmANldAJlcrYdDVSk3W/CI6fcT99xZnhrF84gRbUo7wSiQPtX/kb7
+  Lr5MyFM84G9V/AZSF3X2gvNywrpor16Fnt8xB33ueuRQ1opFNI7NFBRcs6AqdyTW
+  Zs12p7Hk20KdsaShl1SaIi9oxm6DPBdueaFxuAVHETZtN5uBTuvmLTiGgGFoL3kj
+  ATm+bRGIi+iD2pK12M9guso1lAswGY5uU2V4D0q19kmJxAoy8yWE8St3xGh110sE
+  QCyAQGCIbub8t9PnX/RbZXLB+8Q3LZIRlSbQABrgkXonjo+Kc2WH/Pj83gmDpq6E
+  iX9WowqxvGD73vldw0N9yXIoG9qfhtGhlshM0rY8bqDKuJjiNzYS3WbO8fweJ/0I
+  lJwxZoKJ+WIagSg8iKyQdLYxV4Pc5uAbFiY0x8AA7QY+DkP7B3HV/zdMtDgZrvnv
+  CUcJKJgNO9CIFrd6NNE+MV+2iijM+9RVo/7dvYPw/obn6r8yt9Jl/Q97LTcVJxgX
+  TEZVBDY+LLhW8jK1+cvfMe+0Y7SOPPKF4wVVHtu/r5cafO8Jsh17kEgZ9TUn4h9G
+  HxgF3uPTpXar+vq7ScqLHbadZck29N2BNhP/tPOlqSm+QVNF
+

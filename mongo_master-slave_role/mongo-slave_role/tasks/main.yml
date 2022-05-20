@@ -1,0 +1,15 @@
+---
+# tasks file for mongoD
+  
+  - include_tasks: debian.yml
+    when: ansible_os_family == 'Debian'
+
+  - include: replication_dependency.yml  
+
+  - include_tasks: replicate.yml
+
+  - include_tasks: user_creation.yml
+    when: replication_enabled == true 
+
+  - include_tasks: setup_auth.yml
+    when: authentication_enabled == true  

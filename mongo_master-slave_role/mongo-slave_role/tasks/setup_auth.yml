@@ -1,0 +1,22 @@
+---
+- name: Place authentication key on each node
+  copy:
+    dest: "/etc/{{ mongo_authentication_keyname }}"
+    content: "{{ mongo_authentication_key }}"
+    mode: '0400'
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+  when: authentication_enabled and replication_enabled
+
+
+- name: Use different mongod.conf for auth initialization
+  template:
+    src: mongo_auth.j2
+    dest: /etc/mongod.conf
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+  notify: restart mongodb service
+
+
+- name: Flush all handlers at this point
+  meta: flush_handlers

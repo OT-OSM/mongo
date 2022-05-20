@@ -1,0 +1,20 @@
+--- 
+
+- name: Create a replicaset and use a custom priority for each member
+  community.mongodb.mongodb_replicaset:
+    login_host: "{{ ansible_eth0.ipv4.address }}"
+    replica_set: "{{ replica_set }}"
+    members:
+    - host: "{{ mongo_master }}:{{ mongo_port }}"
+      priority: 1
+    - host: "{{ mongo_slave1 }}:{{ mongo_port }}"
+      priority: 0.7
+    - host: "{{ mongo_slave2 }}:{{ mongo_port }}"
+      priority: 0.5
+  when: inventory_hostname in groups['master']
+
+- name: Secondary secondaryOk
+  community.mongodb.mongodb_shell:
+    login_host: "{{ ansible_eth0.ipv4.address }}"
+    eval: "rs.secondaryOk()"
+  when: inventory_hostname in groups['secondary']

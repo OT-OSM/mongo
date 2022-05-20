@@ -1,0 +1,15 @@
+[master] 
+web1 ansible_host=3.90.217.161 ansible_user=ubuntu 
+
+[secondary]
+web2 ansible_host=54.167.29.251 ansible_user=ubuntu 
+web3 ansible_host=54.237.201.36 ansible_user=ubuntu 
+
+[mongo:children]
+master
+secondary
+
+[all:vars]
+ansible_ssh_private_key_file=/home/reena/Downloads/osm.pem
+ansible_python_interpreter=/usr/bin/python3
+
