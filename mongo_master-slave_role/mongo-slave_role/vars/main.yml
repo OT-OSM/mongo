@@ -2,7 +2,7 @@
 # vars file for mongoDB
 
 #Which MongoDB Version to install mention below
-version: 3.4
+version: 4.2
 
 
 # For Configuration File Destination 
