@@ -2,26 +2,35 @@
 # defaults file for mongodb
 
 # Mongo Installation parameters
-mongo_version: "7.0.21"
-mongo_major_version: "7.0"
+mongo_version: "4.2"
 mongo_package_name: mongodb-org
-mongo_apt_repo_url: https://repo.mongodb.org/apt/ubuntu
-
-# GPG Key URLs for Mongo versions
-mongo_apt_key_url:
-  "7.0": "https://www.mongodb.org/static/pgp/server-7.0.asc"
-
-# Only used for older versions (< 7.0)
+mongo_apt_repo_url: http://repo.mongodb.org/apt/ubuntu
 mongo_apt_key_id:
   "3.4": "0C49F3730359A14518585931BC711F9BA15703C6"
   "3.6": "2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5"
   "4.0": "9DA31620334BD75D9DCB49F368818C72E52529D4"
   "4.2": "E162F504A20CDF15827F718D4B7C549A058F8B6B"
-
 mongo_apt_key_server: keyserver.ubuntu.com
-mongo_gpg_key_path: "/usr/share/keyrings/mongodb-server-7.0.gpg"
-
 pymongo_pip_version: 3.7.1
+mongo_redhat_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org
+mongo_redhat_repository:
+  "3.4": "{{ mongo_redhat_url }}/3.4/$basearch/"
+  "3.6": "{{ mongo_redhat_url }}/3.6/$basearch/"
+  "4.0": "{{ mongo_redhat_url }}/4.0/$basearch/"
+  "4.2": "{{ mongo_redhat_url }}/4.2/$basearch/"
+mongo_redhat_repository_gpgkey:
+  "3.4": "https://www.mongodb.org/static/pgp/server-3.4.asc"
+  "3.6": "https://www.mongodb.org/static/pgp/server-3.6.asc"
+  "4.0": "https://www.mongodb.org/static/pgp/server-4.0.asc"
+  "4.2": "https://www.mongodb.org/static/pgp/server-4.2.asc"
+mongo_amazon_url: https://repo.mongodb.org/yum/amazon/2/mongodb-org
+mongo_amazon_repository:
+  "3.4": "{{ mongo_amazon_url }}/3.4/$basearch/"
+  "3.6": "{{ mongo_amazon_url }}/3.6/$basearch/"
+  "4.0": "{{ mongo_amazon_url }}/4.0/$basearch/"
+  "4.2": "{{ mongo_amazon_url }}/4.2/$basearch/"
+yum_lock_timeout: 180
+epel_release_rpm: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 # Mongo Service parameters
 mongo_service_name: mongod
@@ -72,6 +81,3 @@ mongo_authentication_key: |
   CUcJKJgNO9CIFrd6NNE+MV+2iijM+9RVo/7dvYPw/obn6r8yt9Jl/Q97LTcVJxgX
   TEZVBDY+LLhW8jK1+cvfMe+0Y7SOPPKF4wVVHtu/r5cafO8Jsh17kEgZ9TUn4h9G
   HxgF3uPTpXar+vq7ScqLHbadZck29N2BNhP/tPOlqSm+QVNF
-
-
-
