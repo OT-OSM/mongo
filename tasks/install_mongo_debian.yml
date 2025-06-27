@@ -1,12 +1,15 @@
 ---
-- name: Establish some role-related facts
+- name: Set MongoDB major version and codename
   set_fact:
     mongo_major_version: "{{ mongo_version[0:3] }}"
+    mongo_codename: "{{ 'jammy' if ansible_distribution_release == 'noble' else ansible_distribution_release }}"
+    mongo_gpg_key_path: "/usr/share/keyrings/mongodb-server-{{ mongo_major_version }}.gpg"
 
 - name: Install dependencies
   apt:
     name:
       - gnupg
+      - curl
       - python{{ ansible_python['version']['major'] }}-pip
       - python{{ ansible_python['version']['major'] }}-dev
       - python{{ ansible_python['version']['major'] }}-setuptools
@@ -19,21 +22,51 @@
     state: "{{ pymongo_pip_version is defined | ternary('present','latest') }}"
     version: "{{ pymongo_pip_version | default(omit) }}"
 
+# ---------------------------
+# MongoDB 7.0+ repo and secure GPG key method
+# ---------------------------
+- name: Download and convert MongoDB 7.0+ GPG key to keyring
+  shell: |
+    curl -fsSL "{{ mongo_apt_key_url[mongo_major_version] }}" | \
+    gpg --dearmor -o "{{ mongo_gpg_key_path }}"
+  args:
+    creates: "{{ mongo_gpg_key_path }}"
+  when: mongo_major_version is version('7.0', '>=')
 
-- name: Add an apt key by id from a keyserver
+- name: Add MongoDB APT repository for 7.0+
+  apt_repository:
+    repo: "deb [ arch=amd64,arm64 signed-by={{ mongo_gpg_key_path }} ] {{ mongo_apt_repo_url }} {{ mongo_codename }}/mongodb-org/{{ mongo_major_version }} multiverse"
+    filename: "mongodb-org-{{ mongo_major_version }}"
+    state: present
+  when: mongo_major_version is version('7.0', '>=')
+
+# ---------------------------
+# MongoDB < 7.0 repo and legacy APT key
+# ---------------------------
+- name: Add MongoDB APT key (< 7.0)
   apt_key:
     keyserver: "{{ mongo_apt_key_server }}"
     id: "{{ mongo_apt_key_id[mongo_major_version] }}"
     state: present
+  when: mongo_major_version is version('7.0', '<')
 
-- name: Add MongoDB repo
+- name: Add MongoDB repo (< 7.0)
   apt_repository:
-    repo: deb {{ mongo_apt_repo_url }} {{ ansible_distribution_release }}/mongodb-org/{{ mongo_major_version }} multiverse
-    filename: mongodb-org-{{ mongo_major_version }}
+    repo: "deb {{ mongo_apt_repo_url }} {{ mongo_codename }}/mongodb-org/{{ mongo_major_version }} multiverse"
+    filename: "mongodb-org-{{ mongo_major_version }}"
     state: present
+  when: mongo_major_version is version('7.0', '<')
 
-- name: Install mongodb
+# ---------------------------
+# Install MongoDB
+# ---------------------------
+- name: Update apt cache after adding MongoDB repo
+  apt:
+    update_cache: yes
+
+- name: Install MongoDB
   apt:
     name: "{{ mongo_package_name }}{% if (mongo_version | length > 3) %}={{ mongo_version }}{% endif %}"
     state: present
-    update_cache: "yes"
+    update_cache: yes
+
