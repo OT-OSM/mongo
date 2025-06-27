@@ -7,6 +7,7 @@ Version History
 |----------|---------|---------------|-----------------|
 |**27 June 2020** | v0.0.1 | Initial draft | Rajat Vats |
 |**21 March 2022** | v0.0.2 | Manage node DNS | Kritarth Pant |
+|**26 June 2025** | V0.0.3 | Update version 7.0 | Mohit Saini
 
 ### PREREQUISITE
 * ###### NOTHING !!!!
@@ -25,7 +26,7 @@ Version History
 
 |**Variable**|**Default Value**|**Possible Values**|**Description**|
 |------------|-----------------|-------------------|---------------|
-| mongo_version | 4.2 | [4.2, 4.0, 3.6, 3.4] Can mention minor version as well eg: 4.2.7 |MongoDB version | 
+| mongo_version | 7.0 | [7.0, 6.0, 5.0, 4.4, 4.2, 4.0, 3.6, 3.4] | Can mention minor version as well e.g., 7.0.2 | MongoDB version |
 | mongo_port | 27017 | As per your requirement | MongoDB port |
 | replication_enabled | false | [true, false]  |Set True to setup replication
 | mongo_replSetName | repl | As per your requirement | Name of the replica set|
