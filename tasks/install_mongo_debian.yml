@@ -1,39 +1,51 @@
 ---
-- name: Establish some role-related facts
+- name: Set MongoDB major version and codename
   set_fact:
     mongo_major_version: "{{ mongo_version[0:3] }}"
+    mongo_codename: "{{ 'jammy' if ansible_distribution_release == 'noble' else ansible_distribution_release }}"
+    mongo_gpg_key_path: "/usr/share/keyrings/mongodb-server-{{ mongo_major_version }}.gpg"
 
-- name: Install dependencies
+- name: Install required system dependencies
   apt:
     name:
       - gnupg
-      - python{{ ansible_python['version']['major'] }}-pip
-      - python{{ ansible_python['version']['major'] }}-dev
-      - python{{ ansible_python['version']['major'] }}-setuptools
+      - curl
+      - python{{ ansible_python.version.major }}-pip
+      - python{{ ansible_python.version.major }}-dev
+      - python{{ ansible_python.version.major }}-setuptools
     state: present
     update_cache: true
 
-- name: Install PyMongo from PIP
-  pip:
-    name: pymongo
-    state: "{{ pymongo_pip_version is defined | ternary('present','latest') }}"
-    version: "{{ pymongo_pip_version | default(omit) }}"
-
-
-- name: Add an apt key by id from a keyserver
-  apt_key:
-    keyserver: "{{ mongo_apt_key_server }}"
-    id: "{{ mongo_apt_key_id[mongo_major_version] }}"
+- name: Install compatible PyMongo version
+  ansible.builtin.pip:
+    name: "pymongo=={{ pymongo_pip_version }}"
     state: present
 
-- name: Add MongoDB repo
-  apt_repository:
-    repo: deb {{ mongo_apt_repo_url }} {{ ansible_distribution_release }}/mongodb-org/{{ mongo_major_version }} multiverse
-    filename: mongodb-org-{{ mongo_major_version }}
-    state: present
+- name: Download and install MongoDB GPG key in keyring format
+  ansible.builtin.shell: |
+    curl -fsSL {{ mongo_apt_key_url[mongo_major_version] }} | \
+    gpg --dearmor -o {{ mongo_gpg_key_path }}
+  args:
+    creates: "{{ mongo_gpg_key_path }}"
+  become: true
 
-- name: Install mongodb
-  apt:
-    name: "{{ mongo_package_name }}{% if (mongo_version | length > 3) %}={{ mongo_version }}{% endif %}"
+- name: Add MongoDB APT repository securely
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch=amd64 signed-by={{ mongo_gpg_key_path }}]
+      {{ mongo_apt_repo_url }} {{ mongo_codename }}/mongodb-org/{{ mongo_major_version }} multiverse
+    filename: "mongodb-org-{{ mongo_major_version }}"
     state: present
-    update_cache: "yes"
+  become: true
+
+- name: Update apt cache after adding MongoDB repo
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: Install MongoDB
+  ansible.builtin.apt:
+    name: "{{ mongo_package_name }}{% if mongo_version | length > 3 %}={{ mongo_version }}{% endif %}"
+    state: present
+    update_cache: yes
+  become: true
