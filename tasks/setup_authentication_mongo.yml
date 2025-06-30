@@ -10,7 +10,7 @@
     mode: '0644'
   notify:
     - mongodb_restart
-    - wait_till_mongodb_started_on_localhost
+    # - wait_till_mongodb_started_on_localhost
 
 - name: Flush handlers after initial config
   meta: flush_handlers
