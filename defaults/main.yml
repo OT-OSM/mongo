@@ -35,7 +35,7 @@ mongo_db_path: "{{ '/var/lib/mongodb' if ansible_os_family == 'Debian' else '/va
 mongo_pid_file_path: /var/run/mongodb/mongod.pid
 mongo_time_zone_info: /usr/share/zoneinfo
 mongo_port: 27017
-mongo_bindIp: localhost
+mongo_bindIp: 0.0.0.0
 
 # Mongo Replication parameter
 replication_enabled: false
