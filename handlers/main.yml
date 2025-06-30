@@ -1,3 +1,4 @@
+---
 - name: reload_systemd
   systemd:
     daemon_reload: "yes"
@@ -7,24 +8,58 @@
     name: "{{ mongo_service_name }}"
     state: restarted
 
-# ------------------------------------------
-#    (Runs on remote host, NOT localhost!)
-# ------------------------------------------
-- name: Check if MongoDB is already listening on 127.0.0.1
+# ----------------------------------------
+# ✅ Check and wait on cluster nodes
+# ----------------------------------------
+
+- name: Check if MongoDB is already listening on remote nodes
+  shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
+  register: mongo_port_check_remote
+  ignore_errors: true
+  changed_when: false
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['mongo_master'] | list }}"
+    - "{{ groups['mongo_slave'] | list }}"
+  run_once: false
+
+- name: Debug: MongoDB already running on remote node
+  debug:
+    msg: "✅ MongoDB is already listening on {{ item }}:{{ mongo_port }}. Skipping wait."
+  when: mongo_port_check_remote.results[loop.index0].rc == 0
+  with_items:
+    - "{{ groups['mongo_master'] | list }}"
+    - "{{ groups['mongo_slave'] | list }}"
+
+- name: wait_till_mongodb_started
+  wait_for:
+    host: "{{ item }}"
+    port: "{{ mongo_port }}"
+    timeout: 120
+  when: mongo_port_check_remote.results[loop.index0].rc != 0
+  with_items:
+    - "{{ groups['mongo_master'] | list }}"
+    - "{{ groups['mongo_slave'] | list }}"
+
+# ----------------------------------------
+# ✅ Check and wait on localhost
+# ----------------------------------------
+
+- name: Check if MongoDB is already listening on localhost
   shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
   register: mongo_port_check_local
   ignore_errors: true
   changed_when: false
 
-- name: Debug message if MongoDB is already running
+- name: Debug: MongoDB already running on localhost
   debug:
-    msg: "MongoDB is already running on {{ inventory_hostname }}:{{ mongo_port }}, skipping wait."
+    msg: "✅ MongoDB is already listening on 127.0.0.1:{{ mongo_port }}. Skipping wait."
   when: mongo_port_check_local.rc == 0
 
-- name: Wait for MongoDB to be ready on 127.0.0.1 if not already listening
+- name: wait_till_mongodb_started_on_localhost
   wait_for:
     host: "127.0.0.1"
     port: "{{ mongo_port }}"
     delay: 5
-    timeout: 60
+    timeout: 120
   when: mongo_port_check_local.rc != 0
