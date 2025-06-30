@@ -6,7 +6,7 @@ mongo_version: "7.0"
 
 # Mongo Configuration parameters
 mongo_port: 27017
-mongo_bindIp: localhost
+mongo_bindIp: 0.0.0.0
 
 # Mongo Replication parameter
 replication_enabled: false
