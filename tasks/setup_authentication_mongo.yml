@@ -24,7 +24,7 @@
     state: present
   when: inventory_hostname in groups['mongo_master']
   run_once: true
-  # no_log: true
+  no_log: false 
 
 - name: Create admin user
   mongodb_user:
