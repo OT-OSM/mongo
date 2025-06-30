@@ -8,7 +8,7 @@
     state: restarted
 
 # ------------------------------------------
-# ✅ Check if MongoDB is already listening
+#    (Runs on remote host, NOT localhost!)
 # ------------------------------------------
 - name: Check if MongoDB is already listening on 127.0.0.1
   shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
@@ -18,46 +18,13 @@
 
 - name: Debug message if MongoDB is already running
   debug:
-    msg: "✅ MongoDB is already running on port {{ mongo_port }}, skipping wait."
+    msg: "MongoDB is already running on {{ inventory_hostname }}:{{ mongo_port }}, skipping wait."
   when: mongo_port_check_local.rc == 0
 
-- name: Wait for MongoDB to be ready on 127.0.0.1 only if not already listening
+- name: Wait for MongoDB to be ready on 127.0.0.1 if not already listening
   wait_for:
     host: "127.0.0.1"
     port: "{{ mongo_port }}"
     delay: 5
-    timeout: 120
+    timeout: 60
   when: mongo_port_check_local.rc != 0
-
-# ------------------------------------------
-# ✅ OPTIONAL: Do the same for cluster nodes
-# ------------------------------------------
-
-- name: Check if MongoDB is already listening on remote nodes
-  shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
-  register: mongo_port_check_remote
-  ignore_errors: true
-  changed_when: false
-  delegate_to: "{{ item }}"
-  with_items:
-    - "{{ groups['mongo_master'] | list }}"
-    - "{{ groups['mongo_slave'] | list }}"
-  run_once: true  # Avoid unnecessary loop repeats if same result
-
-- name: Debug message if MongoDB is already running on cluster nodes
-  debug:
-    msg: "✅ MongoDB is already running on {{ item }}:{{ mongo_port }}, skipping wait."
-  when: mongo_port_check_remote.results[loop.index0].rc == 0
-  with_items:
-    - "{{ groups['mongo_master'] | list }}"
-    - "{{ groups['mongo_slave'] | list }}"
-
-- name: Wait for MongoDB on cluster nodes only if not already listening
-  wait_for:
-    host: "{{ item }}"
-    port: "{{ mongo_port }}"
-    timeout: 120
-  when: mongo_port_check_remote.results[loop.index0].rc != 0
-  with_items:
-    - "{{ groups['mongo_master'] | list }}"
-    - "{{ groups['mongo_slave'] | list }}"
