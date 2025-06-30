@@ -1,4 +1,5 @@
 ---
+# tasks/setup_authentication_mongo.yml
 
 - name: Use different mongod.conf for auth initialization
   template:
@@ -14,6 +15,7 @@
 - name: Flush all handlers at this point
   meta: flush_handlers
 
+# Create root admin user
 - name: Create root admin user
   mongodb_user:
     database: admin
@@ -24,8 +26,9 @@
     state: present
   when: inventory_hostname in groups['mongo_master']
   run_once: true
-  no_log: false 
+  no_log: false
 
+# Create admin user
 - name: Create admin user
   mongodb_user:
     database: admin
@@ -36,8 +39,9 @@
     state: present
   when: inventory_hostname in groups['mongo_master']
   run_once: true
-  no_log: true
+  no_log: false  # Set to false for debugging
 
+# Create backup root user
 - name: Create backup root user
   mongodb_user:
     database: admin
@@ -48,21 +52,23 @@
     state: present
   when: inventory_hostname in groups['mongo_master']
   run_once: true
-  no_log: true
+  no_log: false  # Set to false for debugging
 
-- name: Create user defined users
+# Create user-defined users
+- name: Create user-defined MongoDB users
   mongodb_user:
     database: admin
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     update_password: on_create
     roles: "{{ item.roles }}"
-  with_items:
-    - "{{ mongo_custom_users }}"
+    state: present
+  loop: "{{ mongo_custom_users }}"
+  when: inventory_hostname in groups['mongo_master'] and mongo_custom_users != 'None'
   run_once: true
-  no_log: true
-  when: inventory_hostname in groups['mongo_master'] and mongo_custom_users != "None"
+  no_log: false  # Set to false for debugging
 
+# Move back to the actual mongod.conf after creating users
 - name: Move back mongod.conf
   template:
     src: mongo_conf.j2
