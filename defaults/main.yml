@@ -2,11 +2,10 @@
 # defaults file for mongodb
 
 # MongoDB Installation Parameters
-mongo_version: "8.0.11"                        
-mongo_major_version: "8.0"                    
+mongo_version: "8.0.11"
+mongo_major_version: "8.0"
 mongo_package_name: mongodb-org
 mongo_apt_repo_url: "https://repo.mongodb.org/apt/ubuntu"
-
 
 mongo_apt_key_id:
   "3.4": "0C49F3730359A14518585931BC711F9BA15703C6"
@@ -47,11 +46,11 @@ slave_priority: 1
 # Authentication Parameters (replace these via Vault!)
 authentication_enabled: true
 mongo_user_admin_name: useradmin
-mongo_user_admin_pwd: "{{ vault_mongo_user_admin_pwd }}"    
+mongo_user_admin_pwd: "{{ vault_mongo_user_admin_pwd }}"
 mongo_root_admin_name: RootAdmin
-mongo_root_admin_pwd: "{{ vault_mongo_root_admin_pwd }}"    
+mongo_root_admin_pwd: "{{ vault_mongo_root_admin_pwd }}"
 mongo_root_backup_name: backupuser
-mongo_root_backup_pwd: "{{ vault_mongo_backup_pwd }}"       
+mongo_root_backup_pwd: "{{ vault_mongo_backup_pwd }}"
 mongo_custom_users: None
 mongo_authentication_keyname: mongo_authentication_key
-mongo_authentication_key: "{{ vault_mongo_authentication_key }}"  
+mongo_authentication_key: "{{ vault_mongo_authentication_key }}"
