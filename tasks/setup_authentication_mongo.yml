@@ -1,81 +1,108 @@
 ---
 # tasks/setup_authentication_mongo.yml
 
-- name: Use different mongod.conf for auth initialization
+- name: Use mongod.conf for auth initialization
   template:
     src: mongo_init_conf.j2
     dest: /etc/mongod.conf
     owner: root
     group: root
-    mode: 0644
+    mode: '0644'
   notify:
     - mongodb_restart
     - wait_till_mongodb_started_on_localhost
 
-- name: Flush all handlers at this point
+- name: Flush handlers after initial config
   meta: flush_handlers
+
+# Ensure mongod is running and responsive
+- name: Wait for MongoDB to be ready on localhost
+  wait_for:
+    host: "127.0.0.1"
+    port: 27017
+    delay: 5
+    timeout: 30
+  delegate_to: localhost
+  run_once: true
+
+- name: Debug root user credentials
+  debug:
+    msg: "Creating root user: {{ mongo_root_admin_name }}"
 
 # Create root admin user
 - name: Create root admin user
   mongodb_user:
+    login_host: localhost
     database: admin
     name: "{{ mongo_root_admin_name }}"
     password: "{{ mongo_root_admin_pwd }}"
-    update_password: on_create
-    roles: root
+    roles: ["root"]
     state: present
+    update_password: on_create
   when: inventory_hostname in groups['mongo_master']
   run_once: true
   no_log: false
 
 # Create admin user
-- name: Create admin user
+- name: Create userAdminAnyDatabase user
   mongodb_user:
+    login_host: localhost
     database: admin
     name: "{{ mongo_user_admin_name }}"
     password: "{{ mongo_user_admin_pwd }}"
-    update_password: on_create
-    roles: userAdminAnyDatabase
+    roles: ["userAdminAnyDatabase"]
     state: present
+    update_password: on_create
+    login_user: "{{ mongo_root_admin_name }}"
+    login_password: "{{ mongo_root_admin_pwd }}"
+    auth_source: admin
   when: inventory_hostname in groups['mongo_master']
   run_once: true
-  no_log: false  # Set to false for debugging
+  no_log: false
 
-# Create backup root user
+# Create backup user
 - name: Create backup root user
   mongodb_user:
+    login_host: localhost
     database: admin
     name: "{{ mongo_root_backup_name }}"
     password: "{{ mongo_root_backup_pwd }}"
-    update_password: on_create
-    roles: backup,clusterMonitor
+    roles: ["backup", "clusterMonitor"]
     state: present
+    update_password: on_create
+    login_user: "{{ mongo_root_admin_name }}"
+    login_password: "{{ mongo_root_admin_pwd }}"
+    auth_source: admin
   when: inventory_hostname in groups['mongo_master']
   run_once: true
-  no_log: false  # Set to false for debugging
+  no_log: false
 
-# Create user-defined users
+# Create custom users
 - name: Create user-defined MongoDB users
   mongodb_user:
+    login_host: localhost
     database: admin
     name: "{{ item.name }}"
     password: "{{ item.password }}"
-    update_password: on_create
     roles: "{{ item.roles }}"
     state: present
+    update_password: on_create
+    login_user: "{{ mongo_root_admin_name }}"
+    login_password: "{{ mongo_root_admin_pwd }}"
+    auth_source: admin
   loop: "{{ mongo_custom_users }}"
-  when: inventory_hostname in groups['mongo_master'] and mongo_custom_users != 'None'
+  when: inventory_hostname in groups['mongo_master'] and mongo_custom_users | length > 0
   run_once: true
-  no_log: false  # Set to false for debugging
+  no_log: false
 
-# Move back to the actual mongod.conf after creating users
+# Restore actual mongod.conf after user setup
 - name: Move back mongod.conf
   template:
     src: mongo_conf.j2
     dest: /etc/mongod.conf
     owner: root
     group: root
-    mode: 0644
+    mode: '0644'
   notify:
     - mongodb_restart
     - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
