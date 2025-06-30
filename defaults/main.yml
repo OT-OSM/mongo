@@ -1,7 +1,4 @@
 ---
-# defaults file for mongodb
-
-# MongoDB Installation Parameters
 mongo_version: "8.0.11"
 mongo_major_version: "8.0"
 mongo_package_name: mongodb-org
