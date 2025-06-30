@@ -72,6 +72,6 @@ mongo_authentication_key: |
   CUcJKJgNO9CIFrd6NNE+MV+2iijM+9RVo/7dvYPw/obn6r8yt9Jl/Q97LTcVJxgX
   TEZVBDY+LLhW8jK1+cvfMe+0Y7SOPPKF4wVVHtu/r5cafO8Jsh17kEgZ9TUn4h9G
   HxgF3uPTpXar+vq7ScqLHbadZck29N2BNhP/tPOlqSm+QVNF
-
-
-
+mongo:
+  ip: "{{ mongo_bindIp }}"
+  hostname: mongodb.local
