@@ -1,6 +1,4 @@
 ---
-# tasks/setup_authentication_mongo.yml
-
 - name: Use mongod.conf for auth initialization
   template:
     src: mongo_init_conf.j2
@@ -10,20 +8,26 @@
     mode: '0644'
   notify:
     - mongodb_restart
-    # - wait_till_mongodb_started_on_localhost
 
 - name: Flush handlers after initial config
   meta: flush_handlers
 
-# Ensure mongod is running and responsive
-- name: Wait for MongoDB to be ready on localhost
+# ---------------------------------------------
+# ✅ Safe MongoDB Port Wait Logic (no localhost)
+# ---------------------------------------------
+- name: Check if MongoDB is already listening on {{ mongo_port }}
+  shell: ss -ltnp | grep {{ mongo_port }}
+  register: mongo_port_check
+  changed_when: false
+  ignore_errors: true
+
+- name: Wait for MongoDB to be ready on this host
   wait_for:
-    host: "127.0.0.1"
-    port: 27017
+    host: "{{ ansible_default_ipv4.address }}"
+    port: "{{ mongo_port }}"
     delay: 5
-    timeout: 30
-  delegate_to: localhost
-  run_once: true
+    timeout: 60
+  when: mongo_port_check.rc != 0
 
 - name: Debug root user credentials
   debug:
@@ -105,7 +109,7 @@
     mode: '0644'
   notify:
     - mongodb_restart
-    - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
+    - wait_till_mongodb_started  # ✅ updated from conditionally using localhost
 
 - name: Flush all handlers at this point
   meta: flush_handlers
