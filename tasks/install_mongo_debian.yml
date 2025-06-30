@@ -1,59 +1,63 @@
 ---
-- name: Set MongoDB major version and codename
+# Debian-specific MongoDB install and wait
+
+- name: Establish some role-related facts
   set_fact:
     mongo_major_version: "{{ mongo_version[0:3] }}"
-    mongo_codename: "{{ 'jammy' if ansible_distribution_release == 'noble' else ansible_distribution_release }}"
-    mongo_gpg_key_path: "/usr/share/keyrings/mongodb-server-{{ mongo_major_version }}.gpg"
 
-- name: Install required system dependencies
+- name: Install dependencies
   apt:
     name:
       - gnupg
-      - curl
       - python{{ ansible_python['version']['major'] }}-pip
       - python{{ ansible_python['version']['major'] }}-dev
       - python{{ ansible_python['version']['major'] }}-setuptools
     state: present
     update_cache: true
 
-- name: Install compatible PyMongo version using ansible.builtin.pip
-  ansible.builtin.pip:
-    name: pymongo==4.6.1
+- name: Install PyMongo from PIP
+  pip:
+    name: pymongo
+    state: "{{ pymongo_pip_version is defined | ternary('present','latest') }}"
+    version: "{{ pymongo_pip_version | default(omit) }}"
+
+- name: Add an apt key by id from a keyserver
+  apt_key:
+    keyserver: "{{ mongo_apt_key_server }}"
+    id: "{{ mongo_apt_key_id[mongo_major_version] }}"
     state: present
 
-# ---------------------------------------------------
-# GPG Key Download and Conversion to Keyring Format
-# ---------------------------------------------------
-- name: Download MongoDB GPG key securely
-  ansible.builtin.get_url:
-    url: "{{ mongo_apt_key_url[mongo_major_version] }}"
-    dest: "/tmp/mongo-server-{{ mongo_major_version }}.asc"
-    mode: '0644'
-  register: mongo_gpg_key_download
-
-- name: Convert GPG key to keyring format
-  command: "gpg --dearmor -o {{ mongo_gpg_key_path }} /tmp/mongo-server-{{ mongo_major_version }}.asc"
-  args:
-    creates: "{{ mongo_gpg_key_path }}"
-  changed_when: false
-
-# ---------------------------------------------------
-# MongoDB APT Repository with Secure Keyring
-# ---------------------------------------------------
-- name: Add MongoDB APT repository securely
+- name: Add MongoDB repo
   apt_repository:
-    repo: >-
-      deb [arch=amd64,arm64 signed-by={{ mongo_gpg_key_path }}]
-      {{ mongo_apt_repo_url }} {{ mongo_codename }}/mongodb-org/{{ mongo_major_version }} multiverse
+    repo: "deb {{ mongo_apt_repo_url }} {{ ansible_distribution_release }}/mongodb-org/{{ mongo_major_version }} multiverse"
     filename: "mongodb-org-{{ mongo_major_version }}"
     state: present
 
-- name: Update apt cache after adding MongoDB repo
-  apt:
-    update_cache: yes
-
-- name: Install MongoDB
+- name: Install mongodb
   apt:
     name: "{{ mongo_package_name }}{% if (mongo_version | length > 3) %}={{ mongo_version }}{% endif %}"
     state: present
-    update_cache: yes
+    update_cache: "yes"
+
+# ---------------------------------------
+# ✅ MongoDB Port Wait Logic (Safe)
+# ---------------------------------------
+
+- name: Check if MongoDB is already listening on 127.0.0.1
+  shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
+  register: mongo_port_check_local
+  ignore_errors: true
+  changed_when: false
+
+- name: Debug: MongoDB already running
+  debug:
+    msg: "✅ MongoDB is already listening on {{ inventory_hostname }}:{{ mongo_port }}. Skipping wait."
+  when: mongo_port_check_local.rc == 0
+
+- name: Wait for MongoDB to start (if not already running)
+  wait_for:
+    host: 127.0.0.1
+    port: "{{ mongo_port }}"
+    delay: 5
+    timeout: 60
+  when: mongo_port_check_local.rc != 0
