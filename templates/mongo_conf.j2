@@ -12,8 +12,10 @@ systemLog:
 # Where and how to store data.
 storage:
   dbPath: {{ mongo_db_path }}
+{% if mongo_major_version is version('7.0', '<') %}
   journal:
     enabled: true
+{% endif %}
 
 # network interfaces
 net:
@@ -36,4 +38,3 @@ security:
 replication:
   replSetName: {{ mongo_replSetName }}
 {% endif %}
-
