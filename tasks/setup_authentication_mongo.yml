@@ -8,13 +8,11 @@
     mode: '0644'
   notify:
     - mongodb_restart
+    - wait_till_mongodb_started_on_localhost
 
 - name: Flush handlers after initial config
   meta: flush_handlers
 
-# ---------------------------------------------
-# ✅ Safe MongoDB Port Wait Logic (no localhost)
-# ---------------------------------------------
 - name: Check if MongoDB is already listening on {{ mongo_port }}
   shell: ss -ltnp | grep {{ mongo_port }}
   register: mongo_port_check
@@ -26,7 +24,7 @@
     host: "{{ ansible_default_ipv4.address }}"
     port: "{{ mongo_port }}"
     delay: 5
-    timeout: 60
+    timeout: 180
   when: mongo_port_check.rc != 0
 
 - name: Debug root user credentials
@@ -109,7 +107,7 @@
     mode: '0644'
   notify:
     - mongodb_restart
-    - wait_till_mongodb_started  # ✅ updated from conditionally using localhost
+    - wait_till_mongodb_started  
 
 - name: Flush all handlers at this point
   meta: flush_handlers
