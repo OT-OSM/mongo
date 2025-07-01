@@ -39,25 +39,25 @@
     state: present
     update_cache: "yes"
 
----------------------------------------
-✅ MongoDB Port Wait Logic (Safe)
----------------------------------------
+# ---------------------------------------
+# ✅ MongoDB Port Wait Logic (Safe)
+# ---------------------------------------
 
-- name: Check if MongoDB is already listening on 127.0.0.1
-  shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
-  register: mongo_port_check_local
-  ignore_errors: true
-  changed_when: false
+# - name: Check if MongoDB is already listening on 127.0.0.1
+#   shell: ss -ltnp | grep 127.0.0.1:{{ mongo_port }}
+#   register: mongo_port_check_local
+#   ignore_errors: true
+#   changed_when: false
 
-- name: Debug: MongoDB already running
-  debug:
-    msg: "✅ MongoDB is already listening on {{ inventory_hostname }}:{{ mongo_port }}. Skipping wait."
-  when: mongo_port_check_local.rc == 0
+# - name: Debug: MongoDB already running
+#   debug:
+#     msg: "✅ MongoDB is already listening on {{ inventory_hostname }}:{{ mongo_port }}. Skipping wait."
+#   when: mongo_port_check_local.rc == 0
 
-- name: Wait for MongoDB to start (if not already running)
-  wait_for:
-    host: 127.0.0.1
-    port: "{{ mongo_port }}"
-    delay: 5
-    timeout: 180
-  when: mongo_port_check_local.rc != 0
+# - name: Wait for MongoDB to start (if not already running)
+#   wait_for:
+#     host: 127.0.0.1
+#     port: "{{ mongo_port }}"
+#     delay: 5
+#     timeout: 180
+#   when: mongo_port_check_local.rc != 0
