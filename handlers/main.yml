@@ -16,6 +16,7 @@
   with_items:
     - "{{ groups['mongo_master'] | list }}"
     - "{{ groups['mongo_slave'] | list }}"
+  delegate_to: "{{ item }}"  
 
 - name: wait_till_mongodb_started_on_localhost
   wait_for:
@@ -23,4 +24,4 @@
     port: "{{ mongo_port }}"
     delay: 5
     timeout: 120
-  delegate_to: "{{ inventory_hostname }}"
+  delegate_to: "{{ inventory_hostname }}" 
