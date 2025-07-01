@@ -20,8 +20,8 @@
 
 - name: wait_till_mongodb_started_on_localhost
   wait_for:
-    host: "192.168.10.22"
+    host: "127.0.0.1"
     port: "{{ mongo_port }}"
     delay: 5
     timeout: 120
-  delegate_to: "{{ inventory_hostname }}" 
+  delegate_to: "{{ ansible_host | default(inventory_hostname) }}"  
