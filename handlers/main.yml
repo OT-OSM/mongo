@@ -25,3 +25,8 @@
     delay: 5
     timeout: 120
   delegate_to: "{{ ansible_host | default(inventory_hostname) }}"  
+  
+- name: DEBUG — Confirm handler execution host
+  debug:
+    msg: "Running handler on {{ inventory_hostname }}"
+  delegate_to: "{{ ansible_host | default(inventory_hostname) }}"
