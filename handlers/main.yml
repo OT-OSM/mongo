@@ -7,7 +7,12 @@
   service:
     name: "{{ mongo_service_name }}"
     state: restarted
-
+    
+- name: DEBUG — Confirm handler execution host
+  debug:
+    msg: "Running handler on {{ inventory_hostname }}"
+  delegate_to: "{{ ansible_host | default(inventory_hostname) }}"
+  
 - name: wait_till_mongodb_started
   wait_for:
     host: "{{ item }}"
@@ -26,7 +31,4 @@
     timeout: 120
   delegate_to: "{{ ansible_host | default(inventory_hostname) }}"  
   
-- name: DEBUG — Confirm handler execution host
-  debug:
-    msg: "Running handler on {{ inventory_hostname }}"
-  delegate_to: "{{ ansible_host | default(inventory_hostname) }}"
+
