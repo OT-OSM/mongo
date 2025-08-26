@@ -53,7 +53,7 @@
     mode: 0644
   notify:
     - mongodb_restart
-    - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
+    # - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
 
 - name: Flush all handlers at this point
   meta: flush_handlers

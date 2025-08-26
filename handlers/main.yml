@@ -7,15 +7,16 @@
   service:
     name: "{{ mongo_service_name }}"
     state: restarted
-
+    
 - name: wait_till_mongodb_started
   wait_for:
     host: "{{ item }}"
     port: "{{ mongo_port }}"
-    timeout: 120
+    timeout: 180
   with_items:
     - "{{ groups['mongo_master'] | list }}"
     - "{{ groups['mongo_slave'] | list }}"
+  delegate_to: "{{ item }}"  
 
 - name: wait_till_mongodb_started_on_localhost
   wait_for:
@@ -23,3 +24,6 @@
     port: "{{ mongo_port }}"
     delay: 5
     timeout: 120
+  delegate_to: "{{ ansible_host | default(inventory_hostname) }}"  
+  
+

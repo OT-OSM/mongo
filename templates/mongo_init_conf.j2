@@ -1,22 +1,6 @@
-# mongod.conf
-
-# for documentation of all options, see:
-#   http://docs.mongodb.org/manual/reference/configuration-options/
-
-# where to write logging data.
-systemLog:
-  destination: file
-  logAppend: true
-  path: {{ mongo_systemlog_path }}
-
-# Where and how to store data.
 storage:
   dbPath: {{ mongo_db_path }}
+{% if mongo_major_version is version('7.0', '<') %}
   journal:
     enabled: true
-
-# network interfaces
-net:
-  port: {{ mongo_port }}
-  bindIp: localhost
-
+{% endif %}
