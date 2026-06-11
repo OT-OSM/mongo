@@ -1,15 +1,15 @@
 ---
 - name: reload_systemd
-  systemd:
-    daemon_reload: "yes"
+  ansible.builtin.systemd:
+    daemon_reload: true
 
 - name: mongodb_restart
-  service:
+  ansible.builtin.service:
     name: "{{ mongo_service_name }}"
     state: restarted
 
 - name: wait_till_mongodb_started
-  wait_for:
+  ansible.builtin.wait_for:
     host: "{{ item }}"
     port: "{{ mongo_port }}"
     timeout: 120
@@ -18,7 +18,7 @@
     - "{{ groups['mongo_slave'] | list }}"
 
 - name: wait_till_mongodb_started_on_localhost
-  wait_for:
+  ansible.builtin.wait_for:
     host: "127.0.0.1"
     port: "{{ mongo_port }}"
     delay: 5

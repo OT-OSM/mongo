@@ -1,23 +1,34 @@
 ---
 galaxy_info:
-  author: Rajat Vats
+  role_name: osm_mongo
+  namespace: opstree_devops
+
+  author: Kanimozhi Viswanathan
   company: Opstree Solutions
-  description: Manage MongoDB with authentication and replications
+
+  description: Manage MongoDB with authentication and replication
+
   license: GPLv2
-  min_ansible_version: 2.5
+
+  min_ansible_version: 2.12
+
   platforms:
     - name: Ubuntu
       versions:
-        - bionic
+        - noble
+        - jammy
+        - focal
+
     - name: EL
       versions:
         - 7
-    - name: Amazon
-      version: 2
+        - 8
+
   galaxy_tags:
     - opstree
     - otosm
     - mongo
+    - mongodb
     - database
     - devsecops
     - devops

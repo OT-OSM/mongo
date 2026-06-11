@@ -1,18 +1,17 @@
 ---
-
 - name: Use different mongod.conf for auth initialization
-  template:
+  ansible.builtin.template:
     src: mongo_init_conf.j2
     dest: /etc/mongod.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - mongodb_restart
     - wait_till_mongodb_started_on_localhost
 
 - name: Flush all handlers at this point
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Create root admin user
   mongodb_user:
@@ -61,18 +60,20 @@
     - "{{ mongo_custom_users }}"
   run_once: true
   no_log: true
-  when: inventory_hostname in groups['mongo_master'] and mongo_custom_users != "None"
+  when:
+    - inventory_hostname in groups['mongo_master']
+    - mongo_custom_users != "None"
 
 - name: Move back mongod.conf
-  template:
+  ansible.builtin.template:
     src: mongo_conf.j2
     dest: /etc/mongod.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - mongodb_restart
     - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
 
 - name: Flush all handlers at this point
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers

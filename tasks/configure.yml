@@ -1,59 +1,63 @@
 ---
-- name: create mongodb group
-  group:
+- name: Create mongodb group
+  ansible.builtin.group:
     name: "{{ mongo_service_group }}"
     state: present
 
-- name: create mongodb user
-  user:
+- name: Create mongodb user
+  ansible.builtin.user:
     name: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
     state: present
 
 - name: Create systemlog dir if missing
-  file:
+  ansible.builtin.file:
     state: directory
-    dest: "{{ mongo_systemlog_path|dirname }}"
+    dest: "{{ mongo_systemlog_path | dirname }}"
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
-    mode: 0755
+    mode: "0755"
   when: mongo_systemlog_destination == "file"
 
 - name: Check systemlog file exists
-  stat: path={{ mongo_systemlog_path }}
+  ansible.builtin.stat:
+    path: "{{ mongo_systemlog_path }}"
   register: logfile_stat
   when: mongo_systemlog_destination == "file"
 
 - name: Create systemlog file if missing
-  file:
+  ansible.builtin.file:
     state: touch
     dest: "{{ mongo_systemlog_path }}"
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
-    mode: 0644
-  when: ( mongo_systemlog_destination == "file"
-        and logfile_stat is defined
-        and not logfile_stat.stat.exists )
+    mode: "0644"
+  when:
+    - mongo_systemlog_destination == "file"
+    - logfile_stat is defined
+    - not logfile_stat.stat.exists
 
 - name: Place authentication key on each node
-  copy:
+  ansible.builtin.copy:
     dest: "/etc/{{ mongo_authentication_keyname }}"
     content: "{{ mongo_authentication_key }}"
-    mode: '0400'
+    mode: "0400"
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
-  when: authentication_enabled and replication_enabled
+  when:
+    - authentication_enabled
+    - replication_enabled
 
 - name: Mongo Configuration Setup
-  template:
+  ansible.builtin.template:
     src: mongo_conf.j2
     dest: /etc/mongod.conf
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
-    mode: 0644
+    mode: "0644"
   notify:
     - mongodb_restart
     - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
 
 - name: Flush all handlers at this point
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers

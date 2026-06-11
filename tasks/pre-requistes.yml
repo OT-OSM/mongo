@@ -1,6 +1,6 @@
 ---
 - name: Configuring the MongoDB dns in /etc/hosts
-  blockinfile:
+  ansible.builtin.blockinfile:
     block: |
       {{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ item }}
     path: /etc/hosts
@@ -10,6 +10,6 @@
     - "{{ groups['mongo'] }}"
 
 - name: Setting up hostname of Mongo nodes
-  hostname:
+  ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
   become: true

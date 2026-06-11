@@ -1,43 +1,43 @@
 ---
 - name: Establish some role-related facts
-  set_fact:
+  ansible.builtin.set_fact:
     mongo_major_version: "{{ mongo_version[0:3] }}"
 
 - name: Install EPEL release repository on RHEL
-  yum:
+  ansible.builtin.yum:
     name: "{{ epel_release_rpm }}"
     state: present
     update_cache: true
   when: ansible_distribution == "RedHat"
 
-- name: Install EPEL release repository on Centos
-  yum:
+- name: Install EPEL release repository on CentOS
+  ansible.builtin.yum:
     name: epel-release
     state: present
     update_cache: true
-  when: ansible_distribution == "Centos"
+  when: ansible_distribution == "CentOS"
 
 - name: Add Mongo repository
-  template:
+  ansible.builtin.template:
     src: mongo_repo.j2
     dest: /etc/yum.repos.d/mongodb.repo
-    mode: 0644
+    mode: "0644"
 
 - name: Install MongoDB package
-  yum:
-    name: "{{ mongo_package_name }}{% if (mongo_version | length > 3) %}-{{ mongo_version }}{% endif %}"
+  ansible.builtin.yum:
+    name: "{{ mongo_package_name }}"
     state: present
     lock_timeout: "{{ yum_lock_timeout }}"
 
 - name: Install PIP
-  yum:
+  ansible.builtin.yum:
     name:
       - python{{ ansible_python['version']['major'] }}-devel
       - python{{ ansible_python['version']['major'] }}-pip
     lock_timeout: "{{ yum_lock_timeout }}"
 
 - name: Install PyMongo from PIP
-  pip:
+  ansible.builtin.pip:
     name: pymongo
     state: "{{ pymongo_pip_version is defined | ternary('present','latest') }}"
     version: "{{ pymongo_pip_version | default(omit) }}"

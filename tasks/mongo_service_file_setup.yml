@@ -1,9 +1,9 @@
 ---
 - name: Setup Mongo service file
-  template:
+  ansible.builtin.template:
     src: mongo_service_file.j2
     dest: /lib/systemd/system/{{ mongo_service_name }}.service
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   when:
@@ -12,7 +12,7 @@
     - reload_systemd
 
 - name: Add symlink for systemd
-  file:
+  ansible.builtin.file:
     src: /lib/systemd/system/{{ mongo_service_name }}.service
     dest: /etc/systemd/system/multi-user.target.wants/{{ mongo_service_name }}.service
     state: link
@@ -22,9 +22,9 @@
     - reload_systemd
 
 - name: Flush all handlers at this point
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Enable mongo service
-  service:
+  ansible.builtin.service:
     name: "{{ mongo_service_name }}"
-    enabled: "yes"
+    enabled: true

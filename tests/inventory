@@ -1,0 +1,16 @@
+[mongo_master]
+mongodb-primary
+
+[mongo_slave]
+mongodb-secondary
+
+[mongo_arbiter]
+mongodb-arbiter
+
+[mongo:children]
+mongo_master
+mongo_slave
+mongo_arbiter
+
+[mongo:vars]
+ansible_user=ubuntu
