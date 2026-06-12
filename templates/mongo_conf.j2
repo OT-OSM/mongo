@@ -1,28 +1,18 @@
 # mongod.conf
 
-# for documentation of all options, see:
-#   http://docs.mongodb.org/manual/reference/configuration-options/
-
-# where to write logging data.
 systemLog:
   destination: file
   logAppend: true
   path: {{ mongo_systemlog_path }}
 
-# Where and how to store data.
 storage:
   dbPath: {{ mongo_db_path }}
   journal:
     enabled: true
 
-# network interfaces
 net:
   port: {{ mongo_port }}
-{% if replication_enabled == true %}
-  bindIp: {{ mongo_bindIp }},{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
-{% else %}
   bindIp: {{ mongo_bindIp }}
-{% endif %}
 
 {% if authentication_enabled == true %}
 security:
@@ -36,4 +26,3 @@ security:
 replication:
   replSetName: {{ mongo_replSetName }}
 {% endif %}
-

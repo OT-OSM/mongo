@@ -15,7 +15,7 @@ mongo_apt_key_id:
 
 mongo_apt_key_server: keyserver.ubuntu.com
 
-pymongo_pip_version: 3.7.1
+pymongo_pip_version: 4.8.0
 
 mongo_redhat_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org
 
@@ -62,7 +62,7 @@ mongo_bindIp: 0.0.0.0
 
 replication_enabled: false
 
-mongo_replSetName: repl
+mongo_replSetName: rs0
 
 mongo_heartbeat_timeout_secs: 10
 
