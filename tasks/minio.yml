@@ -1,0 +1,59 @@
+---
+# =============================================================================
+# MinIO Client (mc) Configuration
+# =============================================================================
+
+- name: Check if mc client already exists
+  ansible.builtin.stat:
+    path: "{{ mongodb_ha_mc_install_path }}"
+  register: mc_binary_stat
+
+- name: Download MinIO client (mc)
+  ansible.builtin.get_url:
+    url: "https://dl.min.io/client/mc/release/linux-amd64/mc"
+    dest: "{{ mongodb_ha_mc_install_path }}"
+    mode: "0755"
+    owner: root
+    group: root
+  when: not mc_binary_stat.stat.exists
+
+- name: Configure mc alias for company MinIO
+  ansible.builtin.command: >
+    {{ mongodb_ha_mc_install_path }} alias set {{ mongodb_ha_minio_alias }}
+    {{ mongodb_ha_minio_endpoint }}
+    {{ mongodb_ha_minio_root_user }}
+    {{ mongodb_ha_minio_root_password }}
+    --insecure
+  changed_when: false
+  no_log: true
+
+- name: Verify MinIO connection
+  ansible.builtin.command: >
+    {{ mongodb_ha_mc_install_path }} ls {{ mongodb_ha_minio_alias }}/ --insecure
+  changed_when: false
+  register: minio_check
+  failed_when: minio_check.rc != 0
+
+- name: Ensure MinIO bucket exists
+  ansible.builtin.command: >
+    {{ mongodb_ha_mc_install_path }} mb --ignore-existing
+    {{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}
+    --insecure
+  changed_when: false
+  when: mongodb_minio_configure | bool
+
+- name: Create failover-resync folder in MinIO bucket
+  ansible.builtin.command: >
+    {{ mongodb_ha_mc_install_path }} mb --ignore-existing
+    {{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/{{ mongodb_ha_minio_resync_folder }}
+    --insecure
+  changed_when: false
+  when: mongodb_minio_configure | bool
+
+- name: Verify MinIO bucket access
+  ansible.builtin.command: >
+    mc ls
+    {{ mongodb_minio_alias }}/{{ mongodb_minio_bucket }}
+  register: minio_validation
+  changed_when: false
+  failed_when: minio_validation.rc != 0

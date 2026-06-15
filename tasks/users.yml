@@ -1,0 +1,50 @@
+# =============================================================================
+# MongoDB Users Setup — HA Users
+# Created on the primary only — replicates to secondaries via oplog
+# =============================================================================
+
+- name: Create root admin user
+  community.mongodb.mongodb_user:
+    database: admin
+    name: "{{ mongo_root_admin_name }}"
+    password: "{{ mongo_root_admin_pwd }}"
+    update_password: on_create
+    roles: root
+    state: present
+  when: inventory_hostname in groups[mongodb_master_group]
+  run_once: true
+  no_log: true
+
+- name: Create user admin
+  community.mongodb.mongodb_user:
+    database: admin
+    name: "{{ mongo_user_admin_name }}"
+    password: "{{ mongo_user_admin_pwd }}"
+    update_password: on_create
+    roles: userAdminAnyDatabase
+    state: present
+    login_user: "{{ mongo_root_admin_name }}"
+    login_password: "{{ mongo_root_admin_pwd }}"
+  when:
+    - inventory_hostname in groups[mongodb_master_group]
+    - mongodb_authentication_enabled | default(true)
+  run_once: true
+  no_log: true
+
+- name: Create backup root user
+  community.mongodb.mongodb_user:
+    database: admin
+    name: "{{ mongo_root_backup_name }}"
+    password: "{{ mongo_root_backup_pwd }}"
+    update_password: on_create
+    roles:
+      - backup
+      - clusterMonitor
+    state: present
+    login_user: "{{ mongo_root_admin_name }}"
+    login_password: "{{ mongo_root_admin_pwd }}"
+  when:
+    - inventory_hostname in groups[mongodb_master_group]
+    - mongodb_authentication_enabled | default(true)
+  run_once: true
+  no_log: true

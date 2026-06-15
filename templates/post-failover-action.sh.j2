@@ -1,0 +1,44 @@
+#!/bin/bash
+# Managed by Ansible (mongodb_server role)
+# Post-failover resync helper.
+# After a primary failover, a recovered/rebuilt node can be brought back into
+# the replica set with the latest data using this script:
+#   1. Restore the most recent mongodump archive (local or MinIO)
+#   2. Re-add the node to the replica set as a secondary
+
+set -euo pipefail
+
+NEW_PRIMARY="$1"      # hostname:port of the current primary
+TARGET_HOST="$2"      # hostname:port of the node being resynced
+
+{% if mongodb_ha_backup_storage == "minio" %}
+LATEST=$({{ mongodb_ha_mc_install_path }} ls "{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/" --insecure \
+  | sort | tail -n1 | awk '{print $NF}')
+ARCHIVE="/tmp/${LATEST}"
+{{ mongodb_ha_mc_install_path }} cp "{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${LATEST}" "${ARCHIVE}" --insecure
+{% else %}
+ARCHIVE=$(ls -t {{ mongodb_ha_local_backup_path }}/full_*/*.archive.gz | head -n1)
+{% endif %}
+
+echo "Restoring from ${ARCHIVE} ..."
+
+/usr/bin/mongorestore \
+{% if mongodb_authentication_enabled | default(true) %}
+  --username "{{ mongo_root_admin_name }}" \
+  --password "{{ mongo_root_admin_pwd }}" \
+  --authenticationDatabase admin \
+{% endif %}
+  --host "${TARGET_HOST}" \
+  --gzip \
+  --archive="${ARCHIVE}" \
+  --drop
+
+echo "Restore complete. Re-adding ${TARGET_HOST} to replica set via ${NEW_PRIMARY} ..."
+
+/usr/bin/mongosh "${NEW_PRIMARY}" \
+{% if mongodb_authentication_enabled | default(true) %}
+  --authenticationDatabase admin -u "{{ mongo_root_admin_name }}" -p "{{ mongo_root_admin_pwd }}" \
+{% endif %}
+  --quiet --eval "rs.add('${TARGET_HOST}')"
+
+echo "Resync complete."

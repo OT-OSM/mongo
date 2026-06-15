@@ -1,0 +1,22 @@
+---
+- name: Create restore directory
+  ansible.builtin.file:
+    path: /tmp/mongodb_restore
+    state: directory
+    mode: "0755"
+
+- name: Download latest backup from MinIO
+  ansible.builtin.command: >
+    mc cp
+    {{ mongodb_minio_alias }}/{{ mongodb_minio_bucket }}/latest/
+    /tmp/mongodb_restore/
+    --recursive
+
+- name: Restore MongoDB dump
+  ansible.builtin.shell: |
+    mongorestore \
+    --authenticationDatabase admin \
+    -u {{ mongo_root_admin_name }} \
+    -p {{ mongo_root_admin_pwd }} \
+    --drop \
+    /tmp/mongodb_restore

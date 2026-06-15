@@ -1,6 +1,6 @@
 [{{ mongo_package_name }}-{{ mongo_major_version }}]
 name=MongoDB {{ mongo_major_version }} Repository
-{% if ansible_distribution == "Amazon"  %}
+{% if ansible_distribution == "Amazon" %}
 baseurl={{ mongo_amazon_repository[mongo_major_version] }}
 {% else %}
 baseurl={{ mongo_redhat_repository[mongo_major_version] }}

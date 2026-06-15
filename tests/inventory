@@ -1,11 +1,22 @@
+# =============================================================================
+# MongoDB HA — Inventory
+# =============================================================================
+# Notes:
+#   - Leave [mongo_arbiter] empty for a standard 2-node primary/secondary setup
+#   - Set mongodb_arbiter_configure=true and populate [mongo_arbiter] for a
+#     3-node PSA (Primary-Secondary-Arbiter) setup
+#   - Set mongodb_backup_server=true on the secondary that runs mongodump
+# =============================================================================
+
 [mongo_master]
-mongodb-primary
+mongo_primary
+
 
 [mongo_slave]
-mongodb-secondary
+mongo_secondary mongodb_backup_server=true
 
 [mongo_arbiter]
-mongodb-arbiter
+# mongo_arbiter
 
 [mongo:children]
 mongo_master

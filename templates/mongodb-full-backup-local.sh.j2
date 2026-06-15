@@ -1,0 +1,43 @@
+#!/bin/bash
+# Managed by Ansible (mongodb_server role)
+# Full mongodump backup to local disk, read from the secondary
+
+set -euo pipefail
+
+BACKUP_DIR="{{ mongodb_ha_local_backup_path }}"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+DEST="${BACKUP_DIR}/full_${TIMESTAMP}"
+ARCHIVE="${DEST}/mongodump_${TIMESTAMP}.archive.gz"
+
+mkdir -p "${DEST}"
+
+/usr/bin/mongodump \
+{% if mongodb_authentication_enabled | default(true) %}
+  --username "{{ mongo_root_backup_name }}" \
+  --password "{{ mongo_root_backup_pwd }}" \
+  --authenticationDatabase admin \
+{% endif %}
+  --host "{{ mongo_replSetName }}/127.0.0.1:{{ mongo_port }}" \
+  --readPreference secondary \
+  --gzip \
+  --archive="${ARCHIVE}"
+
+# Verify archive exists
+if [ ! -f "${ARCHIVE}" ]; then
+    echo "ERROR: Backup archive not created"
+    exit 1
+fi
+
+# Verify archive is not empty
+if [ ! -s "${ARCHIVE}" ]; then
+    echo "ERROR: Backup archive is empty"
+    exit 1
+fi
+
+echo "Backup verification successful"
+echo "Backup created at ${ARCHIVE}"
+
+# Retention — remove backups older than configured days
+find "${BACKUP_DIR}" -maxdepth 1 -type d -name 'full_*' -mtime +{{ mongodb_ha_backup_full_retention_days }} -exec rm -rf {} \;
+
+echo "Backup completed successfully"

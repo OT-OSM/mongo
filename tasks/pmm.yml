@@ -1,0 +1,24 @@
+---
+- name: Install PMM Client
+  ansible.builtin.apt:
+    deb: "/tmp/pmm-client.deb"
+  when: ansible_os_family == "Debian"
+
+- name: Configure PMM Client
+  ansible.builtin.command: >
+    pmm-admin config
+    --server-url=https://{{ mongodb_pmm_username }}:{{ mongodb_pmm_password }}
+    @{{ mongodb_pmm_server }}
+  changed_when: false
+
+- name: Register MongoDB with PMM
+  ansible.builtin.command: >
+    pmm-admin add mongodb
+    --username={{ mongo_root_admin_name }}
+    --password={{ mongo_root_admin_pwd }}
+    --host=127.0.0.1
+    --port={{ mongo_port }}
+    mongodb-{{ inventory_hostname }}
+  register: pmm_registration
+  failed_when: false
+  changed_when: false

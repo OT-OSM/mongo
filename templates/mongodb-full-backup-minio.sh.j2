@@ -1,0 +1,44 @@
+#!/bin/bash
+# Managed by Ansible (mongodb_server role)
+# Full mongodump backup streamed directly to MinIO, read from the secondary
+
+set -euo pipefail
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+DAY_DIR=$(date +%Y-%m-%d)
+ARCHIVE="/tmp/mongodump_${TIMESTAMP}.archive.gz"
+
+/usr/bin/mongodump \
+{% if mongodb_authentication_enabled | default(true) %}
+  --username "{{ mongo_root_backup_name }}" \
+  --password "{{ mongo_root_backup_pwd }}" \
+  --authenticationDatabase admin \
+{% endif %}
+  --host "{{ mongo_replSetName }}/127.0.0.1:{{ mongo_port }}" \
+  --readPreference secondary \
+  --gzip \
+  --archive="${ARCHIVE}"
+
+# Verify archive exists
+if [ ! -f "${ARCHIVE}" ]; then
+    echo "ERROR: Backup archive not created"
+    exit 1
+fi
+
+# Verify archive is not empty
+if [ ! -s "${ARCHIVE}" ]; then
+    echo "ERROR: Backup archive is empty"
+    exit 1
+fi
+
+echo "Backup archive created successfully"
+
+{{ mongodb_ha_mc_install_path }} cp "${ARCHIVE}" \
+  "{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${DAY_DIR}/mongodump_${TIMESTAMP}.archive.gz" \
+  --insecure
+
+echo "MinIO upload successful"
+
+rm -f "${ARCHIVE}"
+
+echo "Backup completed successfully"

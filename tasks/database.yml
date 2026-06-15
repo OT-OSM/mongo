@@ -1,0 +1,26 @@
+# =============================================================================
+# Custom Application Users
+# Define via mongo_custom_users:
+#   mongo_custom_users:
+#     - { name: appuser, password: "...", roles: readWrite, database: appdb }
+#     - { name: monitoring, password: "...", roles: clusterMonitor, database: admin }
+# =============================================================================
+
+- name: Create user-defined application users
+  community.mongodb.mongodb_user:
+    database: "{{ item.database | default('admin') }}"
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    update_password: on_create
+    roles: "{{ item.roles }}"
+    state: present
+    login_user: "{{ mongo_root_admin_name }}"
+    login_password: "{{ mongo_root_admin_pwd }}"
+  loop: "{{ mongo_custom_users }}"
+  run_once: true
+  no_log: true
+  when:
+    - inventory_hostname in groups[mongodb_master_group]
+    - mongodb_authentication_enabled | default(true)
+    - mongo_custom_users != "None"
+    - mongo_custom_users | length > 0

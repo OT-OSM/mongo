@@ -1,0 +1,47 @@
+# =============================================================================
+# MongoDB Installation — Debian / Ubuntu
+# =============================================================================
+
+- name: Establish role-related facts
+  ansible.builtin.set_fact:
+    mongo_major_version: "{{ mongo_version[0:3] }}"
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: "{{ mongodb_packages_debian }}"
+    state: present
+    update_cache: true
+
+- name: Install PyMongo from PIP
+  ansible.builtin.pip:
+    name: pymongo
+    state: "{{ pymongo_pip_version is defined | ternary('present', 'latest') }}"
+    version: "{{ pymongo_pip_version | default(omit) }}"
+
+- name: Download MongoDB GPG key
+  ansible.builtin.get_url:
+    url: "https://pgp.mongodb.com/server-{{ mongo_major_version }}.asc"
+    dest: "/tmp/server-{{ mongo_major_version }}.asc"
+    mode: "0644"
+
+- name: Create MongoDB keyring
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/server-{{ mongo_major_version }}.asc > /usr/share/keyrings/mongodb-server-{{ mongo_major_version }}.gpg
+  args:
+    creates: "/usr/share/keyrings/mongodb-server-{{ mongo_major_version }}.gpg"
+
+- name: Configure MongoDB repository
+  ansible.builtin.copy:
+    dest: "/etc/apt/sources.list.d/mongodb-org-{{ mongo_major_version }}.list"
+    content: |
+      deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongo_major_version }}.gpg ] {{ mongo_apt_repo_url }} {{ ansible_lsb.codename }}/mongodb-org/{{ mongo_major_version }} multiverse
+    mode: "0644"
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install MongoDB
+  ansible.builtin.apt:
+    name: "{{ mongo_package_name }}"
+    state: present

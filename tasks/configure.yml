@@ -1,4 +1,14 @@
----
+# =============================================================================
+# MongoDB Configuration
+# Section 1 — Service setup (user/group, systemd unit, log/data dirs)
+# Section 2 — Replication keyfile (HA only)
+# Section 3 — mongod.conf rendering
+# =============================================================================
+
+# =====================================================
+# SECTION 1 — Service Setup
+# =====================================================
+
 - name: Create mongodb group
   ansible.builtin.group:
     name: "{{ mongo_service_group }}"
@@ -10,7 +20,33 @@
     group: "{{ mongo_service_group }}"
     state: present
 
-- name: Create systemlog dir if missing
+- name: Setup mongod systemd service file
+  ansible.builtin.template:
+    src: mongod.service.j2
+    dest: "/lib/systemd/system/{{ mongo_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  when: ansible_service_mgr == "systemd"
+  notify: reload_systemd
+
+- name: Add symlink for systemd
+  ansible.builtin.file:
+    src: "/lib/systemd/system/{{ mongo_service_name }}.service"
+    dest: "/etc/systemd/system/multi-user.target.wants/{{ mongo_service_name }}.service"
+    state: link
+  when: ansible_service_mgr == "systemd"
+  notify: reload_systemd
+
+- name: Flush handlers to reload systemd
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable mongod service
+  ansible.builtin.service:
+    name: "{{ mongo_service_name }}"
+    enabled: true
+
+- name: Create systemlog directory if missing
   ansible.builtin.file:
     state: directory
     dest: "{{ mongo_systemlog_path | dirname }}"
@@ -32,12 +68,28 @@
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
     mode: "0644"
+    modification_time: preserve
+    access_time: preserve
   when:
     - mongo_systemlog_destination == "file"
     - logfile_stat is defined
     - not logfile_stat.stat.exists
 
-- name: Place authentication key on each node
+- name: Create MongoDB data directory
+  ansible.builtin.file:
+    path: "{{ mongo_db_path }}"
+    state: directory
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+    mode: "0755"
+
+# =====================================================
+# SECTION 2 — Replication Keyfile
+# Required for inter-node auth when both auth and
+# replication are enabled
+# =====================================================
+
+- name: Place authentication keyfile on each node
   ansible.builtin.copy:
     dest: "/etc/{{ mongo_authentication_keyname }}"
     content: "{{ mongo_authentication_key }}"
@@ -45,19 +97,23 @@
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
   when:
-    - authentication_enabled
-    - replication_enabled
+    - mongodb_authentication_enabled | default(true)
+    - mongodb_replication | default(false)
 
-- name: Mongo Configuration Setup
+# =====================================================
+# SECTION 3 — mongod.conf
+# =====================================================
+
+- name: Render mongod.conf
   ansible.builtin.template:
-    src: mongo_conf.j2
+    src: mongod.conf.j2
     dest: /etc/mongod.conf
     owner: "{{ mongo_service_user }}"
     group: "{{ mongo_service_group }}"
     mode: "0644"
   notify:
     - mongodb_restart
-    - "{{ 'wait_till_mongodb_started' if replication_enabled == 'true' else 'wait_till_mongodb_started_on_localhost' }}"
+    - "{{ 'wait_till_mongodb_started' if mongodb_replication | default(false) else 'wait_till_mongodb_started_on_localhost' }}"
 
-- name: Flush all handlers at this point
+- name: Flush handlers to apply config changes
   ansible.builtin.meta: flush_handlers

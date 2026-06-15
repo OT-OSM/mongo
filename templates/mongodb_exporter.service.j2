@@ -1,0 +1,19 @@
+[Unit]
+Description=MongoDB Exporter for Prometheus
+After=network.target
+
+[Service]
+Type=simple
+User={{ mongodb_exporter_user }}
+Group={{ mongodb_exporter_user }}
+EnvironmentFile=/etc/mongodb_exporter/mongodb_exporter.env
+
+ExecStart=/usr/local/bin/mongodb_exporter \
+  --collect-all \
+  --web.listen-address=:{{ mongodb_exporter_port }}
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

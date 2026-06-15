@@ -1,13 +1,118 @@
 ---
-# tasks file for mongodb
+# ######################## #
+# Pre-requisites           #
+# DNS / hostname management #
+# ######################## #
+- name: Including tasks for pre-requisites
+  ansible.builtin.include_tasks: pre_requisites.yml
 
-- name: Include playbook for mongo os configurations
-  ansible.builtin.include_tasks: pre-requistes.yml
+# ######################## #
+# MongoDB Installation      #
+# ######################## #
+- name: Including tasks for Installation of MongoDB
+  ansible.builtin.include_tasks: Ubuntu.yml
+  when:
+    - mongodb_install_packages | default(true)
+    - ansible_os_family == 'Debian'
 
-- name: To install mongo on Debian
-  ansible.builtin.include_tasks: debian.yml
-  when: ansible_os_family == 'Debian'
+- name: Including tasks for Installation of MongoDB
+  ansible.builtin.include_tasks: Redhat.yml
+  when:
+    - mongodb_install_packages | default(true)
+    - ansible_os_family == 'RedHat'
 
-- name: To install mongo on Redhat
-  ansible.builtin.include_tasks: redhat.yml
-  when: ansible_os_family == 'RedHat'
+# ######################## #
+# MongoDB Configuration     #
+# ######################## #
+- name: Including tasks for Configuring MongoDB
+  ansible.builtin.include_tasks: configure.yml
+
+# ############################# #
+# MongoDB Replication Setup      #
+# Primary/Secondary via replica  #
+# set — runs on all members      #
+# ############################# #
+- name: Including tasks for Replication Setup
+  ansible.builtin.include_tasks: replication.yml
+  when: mongodb_replication | default(false)
+
+# ############################# #
+# MongoDB User and DB Operation  #
+# ############################# #
+- name: Including tasks for HA user creation
+  ansible.builtin.include_tasks: users.yml
+  tags:
+    - create_user
+  when: mongodb_authentication_enabled | default(true)
+
+- name: Including tasks for custom database/user creation
+  ansible.builtin.include_tasks: database.yml
+  tags:
+    - create_database
+  when:
+    - mongodb_authentication_enabled | default(true)
+    - mongodb_custom_users_creation | default(true)
+
+# ################################## #
+# HA — Arbiter                       #
+# Runs only on arbiter group         #
+# ################################## #
+- name: Including tasks for Arbiter configuration
+  ansible.builtin.include_tasks: arbiter.yml
+  when:
+    - mongodb_arbiter_configure | default(false)
+    - inventory_hostname in groups[mongodb_arbiter_group] | default([])
+
+# ################################## #
+# Metrics — mongodb_exporter          #
+# ################################## #
+- name: Including tasks for mongodb_exporter
+  ansible.builtin.include_tasks: mongodb_metrics.yml
+  tags:
+    - mongodb_metrics
+  when: mongodb_metrics_enabled | default(false)
+
+# ################################## #
+# PMM Monitoring Setup                #
+# ################################## #
+- name: Including tasks for PMM Monitoring Setup
+  ansible.builtin.include_tasks: pmm.yml
+  tags:
+    - pmm
+  when: mongodb_pmm_enabled | default(false)
+
+# ################################## #
+# MinIO Client                       #
+# Required for backup and restore    #
+# Only when backup_storage is minio  #
+# ################################## #
+- name: Including tasks for MinIO Client Installation
+  ansible.builtin.include_tasks: minio.yml
+  when:
+    - mongodb_ha_backup_storage | default("minio") == "minio"
+    - mongodb_minio_configure | default(false)
+
+# ################################## #
+# Backup Scripts                     #
+# Storage type controlled by         #
+# mongodb_ha_backup_storage toggle:   #
+#   minio — streams to MinIO         #
+#   local — stores on local disk     #
+# ################################## #
+- name: Including tasks for HA Backup Scripts
+  ansible.builtin.include_tasks: backup_scripts.yml
+  tags:
+    - backup_scripts
+  when: >
+    mongodb_deploy_backup_scripts | default(false) or
+    mongodb_backup_server | default(false)
+
+# ################################## #
+# Post-Failover Resync Script        #
+# Runs only on the backup server     #
+# ################################## #
+- name: Including tasks for Post-Failover Script
+  ansible.builtin.include_tasks: post_failover_script.yml
+  tags:
+    - failover_script
+  when: mongodb_deploy_failover_script | default(false)

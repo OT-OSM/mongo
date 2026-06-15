@@ -2,11 +2,20 @@
 - name: reload_systemd
   ansible.builtin.systemd:
     daemon_reload: true
+  listen: reload_systemd
 
 - name: mongodb_restart
   ansible.builtin.service:
     name: "{{ mongo_service_name }}"
     state: restarted
+  listen: mongodb_restart
+
+- name: restart_mongodb_exporter
+  ansible.builtin.service:
+    name: "{{ mongodb_exporter_service_name }}"
+    state: restarted
+    enabled: true
+  listen: restart_mongodb_exporter
 
 - name: wait_till_mongodb_started
   ansible.builtin.wait_for:
@@ -14,8 +23,9 @@
     port: "{{ mongo_port }}"
     timeout: 120
   with_items:
-    - "{{ groups['mongo_master'] | list }}"
-    - "{{ groups['mongo_slave'] | list }}"
+    - "{{ groups[mongodb_master_group] | default([]) | list }}"
+    - "{{ groups[mongodb_slave_group] | default([]) | list }}"
+  listen: wait_till_mongodb_started
 
 - name: wait_till_mongodb_started_on_localhost
   ansible.builtin.wait_for:
@@ -23,3 +33,4 @@
     port: "{{ mongo_port }}"
     delay: 5
     timeout: 120
+  listen: wait_till_mongodb_started_on_localhost

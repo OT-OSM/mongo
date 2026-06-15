@@ -1,16 +1,12 @@
 ---
 galaxy_info:
-  role_name: osm_mongo
-  namespace: opstree_devops
-
   author: Kanimozhi Viswanathan
+  description: Install, configure, and manage MongoDB 8.0 with Primary-Secondary replication, optional Arbiter, authentication, Prometheus metrics (mongodb_exporter), PMM monitoring, and mongodump-based backups to MinIO or local disk
   company: Opstree Solutions
-
-  description: Manage MongoDB with authentication and replication
-
-  license: GPLv2
-
-  min_ansible_version: 2.12
+  license: GPLv3
+  min_ansible_version: "2.12"
+  role_name: mongodb_server
+  namespace: opstree_devops
 
   platforms:
     - name: Ubuntu
@@ -18,7 +14,6 @@ galaxy_info:
         - noble
         - jammy
         - focal
-
     - name: EL
       versions:
         - 7
@@ -29,8 +24,9 @@ galaxy_info:
     - otosm
     - mongo
     - mongodb
+    - replication
+    - ha
     - database
-    - devsecops
     - devops
 
 dependencies: []
