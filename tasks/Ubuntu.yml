@@ -12,11 +12,16 @@
     state: present
     update_cache: true
 
-- name: Install PyMongo from PIP
+- name: Install pip
+  ansible.builtin.apt:
+    name: python3-pip
+    state: present
+
+- name: Install PyMongo 4.x
   ansible.builtin.pip:
-    name: pymongo
-    state: "{{ pymongo_pip_version is defined | ternary('present', 'latest') }}"
-    version: "{{ pymongo_pip_version | default(omit) }}"
+    name: "pymongo>=4.6"
+    executable: pip3
+    extra_args: --break-system-packages
 
 - name: Download MongoDB GPG key
   ansible.builtin.get_url:

@@ -20,7 +20,7 @@
     < /tmp/repset_init.js
   register: rep_initiate
   changed_when: "'ok' in rep_initiate.stdout"
-  failed_when: false
+  ignore_errors: true
   no_log: true
   when: inventory_hostname in groups[mongodb_master_group]
 

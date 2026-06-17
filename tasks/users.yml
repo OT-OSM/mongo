@@ -1,6 +1,8 @@
+---
 # =============================================================================
 # MongoDB Users Setup — HA Users
-# Created on the primary only — replicates to secondaries via oplog
+# Created only on PRIMARY
+# Users replicate automatically to SECONDARY nodes
 # =============================================================================
 
 - name: Create root admin user
@@ -11,9 +13,20 @@
     update_password: on_create
     roles: root
     state: present
-  when: inventory_hostname in groups[mongodb_master_group]
+
+    create_for_localhost_exception: /var/lib/mongodb/.mongodb_admin_created
+
+    login_user: "{{ mongo_root_admin_name if not mongodb_bootstrap_mode else omit }}"
+    login_password: "{{ mongo_root_admin_pwd if not mongodb_bootstrap_mode else omit }}"
+    login_database: admin
+  when:
+    - inventory_hostname in groups[mongodb_master_group]
   run_once: true
-  no_log: true
+  no_log: false
+
+# =============================================================================
+# User Admin
+# =============================================================================
 
 - name: Create user admin
   community.mongodb.mongodb_user:
@@ -23,13 +36,20 @@
     update_password: on_create
     roles: userAdminAnyDatabase
     state: present
+
     login_user: "{{ mongo_root_admin_name }}"
     login_password: "{{ mongo_root_admin_pwd }}"
+    login_database: admin
   when:
     - inventory_hostname in groups[mongodb_master_group]
     - mongodb_authentication_enabled | default(true)
+    - not mongodb_bootstrap_mode
   run_once: true
   no_log: true
+
+# =============================================================================
+# Backup User
+# =============================================================================
 
 - name: Create backup root user
   community.mongodb.mongodb_user:
@@ -41,10 +61,13 @@
       - backup
       - clusterMonitor
     state: present
+
     login_user: "{{ mongo_root_admin_name }}"
     login_password: "{{ mongo_root_admin_pwd }}"
+    login_database: admin
   when:
     - inventory_hostname in groups[mongodb_master_group]
     - mongodb_authentication_enabled | default(true)
+    - not mongodb_bootstrap_mode
   run_once: true
   no_log: true

@@ -83,6 +83,13 @@
     group: "{{ mongo_service_group }}"
     mode: "0755"
 
+- name: Ensure MongoDB data directory ownership
+  ansible.builtin.file:
+    path: "{{ mongo_db_path }}"
+    owner: "{{ mongo_service_user }}"
+    group: "{{ mongo_service_group }}"
+    recurse: true
+
 # =====================================================
 # SECTION 2 — Replication Keyfile
 # Required for inter-node auth when both auth and
