@@ -1,14 +1,20 @@
 ---
+- name: Download PMM Client package
+  ansible.builtin.get_url:
+    url: "https://downloads.percona.com/downloads/pmm2-client/pmm2-client-{{ mongodb_ha_pmm_client_version }}/binary/debian/jammy/x86_64/pmm2-client-{{ mongodb_ha_pmm_client_version }}-6.jammy.amd64.deb"
+    dest: /tmp/pmm-client.deb
+    mode: "0644"
+  when: ansible_os_family == "Debian"
+
 - name: Install PMM Client
   ansible.builtin.apt:
-    deb: "/tmp/pmm-client.deb"
+    deb: /tmp/pmm-client.deb
   when: ansible_os_family == "Debian"
 
 - name: Configure PMM Client
   ansible.builtin.command: >
     pmm-admin config
-    --server-url=https://{{ mongodb_pmm_username }}:{{ mongodb_pmm_password }}
-    @{{ mongodb_pmm_server }}
+    --server-url={{ mongodb_ha_pmm_server_url }}
   changed_when: false
 
 - name: Register MongoDB with PMM

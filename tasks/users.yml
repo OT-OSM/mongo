@@ -22,7 +22,7 @@
   when:
     - inventory_hostname in groups[mongodb_master_group]
   run_once: true
-  no_log: false
+  no_log: true
 
 # =============================================================================
 # User Admin

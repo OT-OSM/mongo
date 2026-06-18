@@ -1,22 +1,69 @@
 ---
+# =====================================================
+# MongoDB Restore Workflow
+# =====================================================
+
 - name: Create restore directory
   ansible.builtin.file:
-    path: /tmp/mongodb_restore
+    path: "{{ mongodb_restore_directory }}"
     state: directory
     mode: "0755"
+
+# -----------------------------------------------------
+# Download backup from MinIO
+# -----------------------------------------------------
 
 - name: Download latest backup from MinIO
   ansible.builtin.command: >
     mc cp
-    {{ mongodb_minio_alias }}/{{ mongodb_minio_bucket }}/latest/
-    /tmp/mongodb_restore/
+    {{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/latest/
+    {{ mongodb_restore_directory }}/
     --recursive
 
-- name: Restore MongoDB dump
+# -----------------------------------------------------
+# Find backup archive
+# -----------------------------------------------------
+
+- name: Locate backup archive
+  ansible.builtin.find:
+    paths: "{{ mongodb_restore_directory }}"
+    patterns: "*.archive.gz"
+  register: mongodb_restore_archive
+
+# -----------------------------------------------------
+# Restore archive
+# -----------------------------------------------------
+
+- name: Restore MongoDB archive
   ansible.builtin.shell: |
     mongorestore \
-    --authenticationDatabase admin \
-    -u {{ mongo_root_admin_name }} \
-    -p {{ mongo_root_admin_pwd }} \
-    --drop \
-    /tmp/mongodb_restore
+      --authenticationDatabase admin \
+      -u {{ mongo_root_admin_name }} \
+      -p '{{ mongo_root_admin_pwd }}' \
+      --gzip \
+      --archive={{ mongodb_restore_archive.files[0].path }} \
+      --drop
+  when:
+    - mongodb_restore_archive.matched | int > 0
+
+# -----------------------------------------------------
+# Optional validation
+# -----------------------------------------------------
+
+- name: Verify restore completed
+  ansible.builtin.shell: >
+    mongosh
+    --authenticationDatabase admin
+    -u {{ mongo_root_admin_name }}
+    -p '{{ mongo_root_admin_pwd }}'
+    --quiet
+    --eval "db.adminCommand({ listDatabases: 1 }).databases.length"
+  register: restore_validation
+  changed_when: false
+  when: mongodb_backup_verify | default(true)
+
+- name: Display restore validation
+  ansible.builtin.debug:
+    msg: "Restore validation successful. Databases found: {{ restore_validation.stdout }}"
+  when:
+    - mongodb_backup_verify | default(true)

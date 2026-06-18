@@ -38,6 +38,19 @@
     group: root
     mode: "0755"
 
+# -----------------------------------------------------
+# Deploy oplog backup script
+# -----------------------------------------------------
+
+- name: Deploy oplog backup script
+  ansible.builtin.template:
+    src: mongodb-oplog-backup-local.sh.j2
+    dest: "{{ mongodb_ha_backup_scripts_path }}/mongodb-oplog-backup.sh"
+    owner: root
+    group: root
+    mode: "0755"
+  when: mongodb_ha_oplog_backup_enabled | default(false)
+
 # ── Cron job ───────────────────────────────────────────────────────────────
 - name: Setup full backup cron job
   ansible.builtin.cron:
@@ -52,3 +65,13 @@
     mongodb_setup_backup_cron | default(false) or
     mongodb_backup_server | default(false)
 
+- name: Setup oplog backup cron job
+  ansible.builtin.cron:
+    name: "MongoDB HA oplog backup"
+    minute: "{{ mongodb_ha_oplog_backup_cron_minute }}"
+    hour: "{{ mongodb_ha_oplog_backup_cron_hour }}"
+    job: "{{ mongodb_ha_backup_scripts_path }}/mongodb-oplog-backup.sh >> {{ mongodb_ha_backup_log_file }} 2>&1"
+    user: root
+    state: present
+  when:
+    - mongodb_ha_oplog_backup_enabled | default(false)

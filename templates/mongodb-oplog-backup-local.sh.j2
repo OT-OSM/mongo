@@ -1,0 +1,20 @@
+#!/bin/bash
+
+DATE=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p {{ mongodb_ha_local_backup_path }}/oplog
+
+mongodump \
+  --host localhost \
+  --authenticationDatabase admin \
+  -u {{ mongo_root_backup_name }} \
+  -p '{{ mongo_root_backup_pwd }}' \
+  --db local \
+  --collection oplog.rs \
+  --gzip \
+  --archive={{ mongodb_ha_local_backup_path }}/oplog/oplog_${DATE}.archive.gz
+
+find {{ mongodb_ha_local_backup_path }}/oplog \
+  -name "*.archive.gz" \
+  -mtime +{{ mongodb_ha_oplog_backup_retention_days }} \
+  -delete

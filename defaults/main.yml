@@ -20,13 +20,13 @@ mongodb_root_password_update: false
 # Feature Toggles — HA / Add-on Components
 # =====================================================
 mongodb_arbiter_configure: false          # Add an arbiter node to the replica set
-mongodb_metrics_enabled: false            # Install mongodb_exporter for Prometheus
+mongodb_metrics_enabled: true            # Install mongodb_exporter for Prometheus
 mongodb_pmm_enabled: false                # Register node with PMM server
 mongodb_minio_configure: false            # Install/configure mc client (for MinIO backups)
 mongodb_deploy_backup_scripts: false      # Deploy mongodump backup scripts
 mongodb_setup_backup_cron: false          # Enable backup cron jobs
 mongodb_backup_server: false              # Mark this node as the backup server
-mongodb_deploy_failover_script: false     # Deploy post-failover resync helper script
+mongodb_deploy_failover_script: true     # Deploy post-failover resync helper script
 
 # =====================================================
 # Inventory Group Names
@@ -130,6 +130,7 @@ mongodb_exporter_user: mongodb_exporter
 mongodb_exporter_port: 9216
 mongodb_exporter_db_user: "{{ mongo_root_backup_name }}"
 mongodb_exporter_db_password: "{{ mongo_root_backup_pwd }}"
+mongodb_exporter_download_url: "https://github.com/percona/mongodb_exporter/releases/download/v{{ mongodb_exporter_version }}/mongodb_exporter-{{ mongodb_exporter_version }}.linux-amd64.tar.gz"
 
 # =====================================================
 # PMM (Percona Monitoring and Management)
@@ -155,15 +156,29 @@ mongodb_ha_backup_full_cron_minute: "0"
 mongodb_ha_backup_full_cron_hour: "1"
 mongodb_ha_backup_full_cron_weekday: "*"
 
+# Oplog Backup
+mongodb_ha_oplog_backup_enabled: true
+
+mongodb_ha_oplog_backup_cron_minute: "*/30"
+mongodb_ha_oplog_backup_cron_hour: "*"
+
+mongodb_ha_oplog_backup_retention_days: 2
+
 # =====================================================
 # MinIO Client (mc) — used for backup uploads
 # =====================================================
 mongodb_ha_mc_install_path: /usr/local/bin/mc
+
 mongodb_ha_minio_alias: mongo-minio
-mongodb_ha_minio_endpoint: "https://minio.example.com"
-mongodb_ha_minio_root_user: minioadmin
-mongodb_ha_minio_root_password: changeme
-mongodb_ha_minio_bucket: mongodb-backup
+
+mongodb_ha_minio_endpoint: "https://minio.ldc.opstree.dev:8443"
+
+mongodb_ha_minio_root_user: "minioadmin"
+
+mongodb_ha_minio_root_password: "opstreeadmin@2510"
+
+mongodb_ha_minio_bucket: "mongodb-backup"
+
 mongodb_ha_minio_resync_folder: failover-resync
 
 # =====================================================
@@ -179,8 +194,19 @@ mongodb_backup_verify: true
 
 mongodb_restore_directory: /tmp/mongodb_restore
 
-mongodb_pmm_server: pmm.example.com
+# =====================================================
+# Security Hardening
+# =====================================================
 
-mongodb_pmm_username: admin
+mongodb_slow_op_threshold_ms: 100
+mongodb_profiling_mode: slowOp
 
-mongodb_pmm_password: changeme
+mongodb_tls_enabled: false
+mongodb_tls_cert_key_file: /etc/ssl/mongodb/mongodb.pem
+mongodb_tls_ca_file: /etc/ssl/mongodb/ca.pem
+
+mongodb_ha_slack_webhook_url: ""
+mongodb_ha_alert_email: ""
+
+mongodb_ha_failover_max_restart_wait: 300
+mongodb_ha_failover_retry_interval: 15

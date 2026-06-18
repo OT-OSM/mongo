@@ -8,6 +8,10 @@ systemLog:
 storage:
   dbPath: {{ mongo_db_path }}
 
+operationProfiling:
+  slowOpThresholdMs: {{ mongodb_slow_op_threshold_ms }}
+  mode: {{ mongodb_profiling_mode }}
+
 net:
   port: {{ mongo_port }}
   bindIp: {{ mongo_bindIp }}

@@ -52,8 +52,9 @@
 
 - name: Verify MinIO bucket access
   ansible.builtin.command: >
-    mc ls
-    {{ mongodb_minio_alias }}/{{ mongodb_minio_bucket }}
+    {{ mongodb_ha_mc_install_path }} ls
+    {{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}
+    --insecure
   register: minio_validation
   changed_when: false
   failed_when: minio_validation.rc != 0
