@@ -4,26 +4,26 @@ rs.initiate({
   members: [
 {% set member_id = namespace(value=0) %}
 
-{% for host in groups[mongodb_master_group] | default([]) %}
+{% for host in groups.get(mongodb_master_group, []) %}
     {
       _id: {{ member_id.value }},
       host: "{{ host }}:{{ mongo_port }}",
       priority: {{ master_priority }}
     }{% set member_id.value = member_id.value + 1 %}{% if not loop.last or
-          (groups[mongodb_slave_group] | default([])) | length > 0 or
-          (groups[mongodb_arbiter_group] | default([])) | length > 0 %},{% endif %}
+          (groups.get(mongodb_slave_group, [])) | length > 0 or
+          (groups.get(mongodb_arbiter_group, [])) | length > 0 %},{% endif %}
 {% endfor %}
 
-{% for host in groups[mongodb_slave_group] | default([]) %}
+{% for host in groups.get(mongodb_slave_group, []) %}
     {
       _id: {{ member_id.value }},
       host: "{{ host }}:{{ mongo_port }}",
       priority: {{ slave_priority }}
     }{% set member_id.value = member_id.value + 1 %}{% if not loop.last or
-          (groups[mongodb_arbiter_group] | default([])) | length > 0 %},{% endif %}
+          (groups.get(mongodb_arbiter_group, [])) | length > 0 %},{% endif %}
 {% endfor %}
 
-{% for host in groups[mongodb_arbiter_group] | default([]) %}
+{% for host in groups.get(mongodb_arbiter_group, []) %}
     {
       _id: {{ member_id.value }},
       host: "{{ host }}:{{ mongo_port }}",
