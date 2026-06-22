@@ -11,7 +11,9 @@
   ansible.builtin.template:
     src: repset_init.js.j2
     dest: /tmp/repset_init.js
-  when: inventory_hostname in groups[mongodb_master_group]
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
 
 - name: Initiate the replica set
   ansible.builtin.shell: >
@@ -22,7 +24,9 @@
   changed_when: "'ok' in rep_initiate.stdout"
   ignore_errors: true
   no_log: true
-  when: inventory_hostname in groups[mongodb_master_group]
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
 
 # =====================================================
 # First-run fallback: no users exist yet, so the
@@ -41,9 +45,10 @@
     - mongodb_restart
     - wait_till_mongodb_started_on_localhost
   when:
-    - mongodb_authentication_enabled | default(true)
-    - rep_initiate is failed
-    - inventory_hostname in groups[mongodb_master_group]
+  - mongodb_authentication_enabled | default(true)
+  - rep_initiate is failed
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
 
 - name: Flush handlers to apply bootstrap config
   ansible.builtin.meta: flush_handlers
@@ -53,16 +58,19 @@
     /usr/bin/mongosh < /tmp/repset_init.js
   changed_when: true
   when:
-    - mongodb_authentication_enabled | default(true)
-    - rep_initiate is failed
-    - inventory_hostname in groups[mongodb_master_group]
+  - mongodb_authentication_enabled | default(true)
+  - rep_initiate is failed
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
 
 - name: Wait for replica set to elect a primary
   ansible.builtin.pause:
     seconds: 15
   when:
-    - rep_initiate is failed
-    - inventory_hostname in groups[mongodb_master_group]
+  - mongodb_authentication_enabled | default(true)
+  - rep_initiate is failed
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
 
 - name: Create HA users now that the replica set is initiated
   ansible.builtin.include_tasks: users.yml
@@ -95,9 +103,13 @@
   register: replica_status
   changed_when: false
   no_log: true
-  when: inventory_hostname in groups[mongodb_master_group]
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
 
 - name: Display replica set status
   ansible.builtin.debug:
     var: replica_status.stdout_lines
-  when: inventory_hostname in groups[mongodb_master_group]
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group] 

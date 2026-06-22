@@ -20,7 +20,8 @@
   run_once: true
   no_log: true
   when:
-    - inventory_hostname in groups[mongodb_master_group]
-    - mongodb_authentication_enabled | default(true)
-    - mongo_custom_users != "None"
-    - mongo_custom_users | length > 0
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
+  - mongodb_authentication_enabled | default(true)
+  - mongo_custom_users != "None"
+  - mongo_custom_users | length > 0
