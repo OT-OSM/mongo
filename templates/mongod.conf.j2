@@ -17,13 +17,11 @@ net:
   bindIp: {{ mongo_bindIp }}
 
 {% if mongodb_authentication_enabled | default(true) %}
-
 security:
   authorization: enabled
 {% if mongodb_replication | default(false) %}
   keyFile: /etc/{{ mongo_authentication_keyname }}
 {% endif %}
-
 {% endif %}
 
 {% if mongodb_replication | default(false) %}
