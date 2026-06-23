@@ -29,7 +29,13 @@
 - name: Validate replica set status
   ansible.builtin.shell: >
     /usr/bin/mongosh
-    --quiet --eval "rs.status().members.forEach(m => print(m.name + ' -> ' + m.stateStr))"
+    {% if mongodb_authentication_enabled | default(true) %}
+    -u {{ mongo_root_admin_name }}
+    -p '{{ mongo_root_admin_pwd }}'
+    --authenticationDatabase admin
+    {% endif %}
+    --quiet
+    --eval "rs.status().members.forEach(m => print(m.name + ' -> ' + m.stateStr))"
   register: replica_status
   changed_when: false
   no_log: false
