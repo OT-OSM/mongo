@@ -27,6 +27,15 @@
 - name: Including tasks for Configuring MongoDB
   ansible.builtin.include_tasks: configure.yml
 
+
+# ############################# #
+# MongoDB Replication Setup
+# ############################# #
+- name: Including tasks for Replication Setup
+  ansible.builtin.include_tasks: replication.yml
+  when: mongodb_replication | default(false)
+
+
 # ############################# #
 # MongoDB User and DB Operation  #
 # ############################# #
@@ -43,13 +52,6 @@
   when:
     - mongodb_authentication_enabled | default(true)
     - mongodb_custom_users_creation | default(true)
-
-# ############################# #
-# MongoDB Replication Setup
-# ############################# #
-- name: Including tasks for Replication Setup
-  ansible.builtin.include_tasks: replication.yml
-  when: mongodb_replication | default(false)
 
 # ################################## #
 # HA — Arbiter                       #
