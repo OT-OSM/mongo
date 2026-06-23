@@ -23,7 +23,7 @@
   - mongodb_master_group in groups
   - inventory_hostname in groups[mongodb_master_group]
   run_once: true
-  no_log: true
+  no_log: false
 
 # =============================================================================
 # User Admin
