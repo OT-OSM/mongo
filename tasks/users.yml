@@ -1,10 +1,22 @@
 ---
 # =============================================================================
-# MongoDB Users Setup — HA Users
-# Created only on PRIMARY
-# Users replicate automatically to SECONDARY nodes
+# Check Root admin user Existance
 # =============================================================================
 
+- name: Check if root admin marker exists
+  ansible.builtin.stat:
+    path: /var/lib/mongodb/.mongodb_admin_created
+  register: mongo_admin_marker
+
+  when:
+    - mongodb_master_group in groups
+    - inventory_hostname in groups[mongodb_master_group]
+
+  run_once: true
+
+# =============================================================================
+# MongoDB Users Setup — HA Users
+# =============================================================================
 - name: Create root admin user
   community.mongodb.mongodb_user:
     database: admin
@@ -13,15 +25,13 @@
     update_password: on_create
     roles: root
     state: present
-
     create_for_localhost_exception: /var/lib/mongodb/.mongodb_admin_created
 
-    login_user: "{{ mongo_root_admin_name if not mongodb_bootstrap_mode else omit }}"
-    login_password: "{{ mongo_root_admin_pwd if not mongodb_bootstrap_mode else omit }}"
-    login_database: admin
   when:
-  - mongodb_master_group in groups
-  - inventory_hostname in groups[mongodb_master_group]
+    - mongodb_master_group in groups
+    - inventory_hostname in groups[mongodb_master_group]
+    - not mongo_admin_marker.stat.exists
+
   run_once: true
   no_log: false
 
@@ -45,9 +55,9 @@
   - mongodb_master_group in groups
   - inventory_hostname in groups[mongodb_master_group]
   - mongodb_authentication_enabled | default(true)
-  - not mongodb_bootstrap_mode
+
   run_once: true
-  no_log: true
+  no_log: false
 
 # =============================================================================
 # Backup User
@@ -71,6 +81,6 @@
   - mongodb_master_group in groups
   - inventory_hostname in groups[mongodb_master_group]
   - mongodb_authentication_enabled | default(true)
-  - not mongodb_bootstrap_mode
+
   run_once: true
-  no_log: true
+  no_log: false

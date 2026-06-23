@@ -94,7 +94,6 @@ arbiter_priority: 0
 # =====================================================
 # Authentication — Override via Vault
 # =====================================================
-mongodb_bootstrap_mode: false
 mongo_user_admin_name: useradmin
 mongo_user_admin_pwd: changeme
 mongo_root_admin_name: RootAdmin

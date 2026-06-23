@@ -18,91 +18,28 @@
 - name: Initiate the replica set
   ansible.builtin.shell: >
     /usr/bin/mongosh
-    {{ '--authenticationDatabase admin -u ' + mongo_root_admin_name + ' -p ' + mongo_root_admin_pwd if mongodb_authentication_enabled | default(true) else '' }}
+    --authenticationDatabase admin
+    -u {{ mongo_root_admin_name }}
+    -p {{ mongo_root_admin_pwd }}
     < /tmp/repset_init.js
   register: rep_initiate
   changed_when: "'ok' in rep_initiate.stdout"
   ignore_errors: true
-  no_log: true
+  no_log: false
   when:
   - mongodb_master_group in groups
   - inventory_hostname in groups[mongodb_master_group]
-
-# =====================================================
-# First-run fallback: no users exist yet, so the
-# authenticated initiate above failed. Switch to a
-# temporary no-auth config, create users, then retry.
-# =====================================================
-
-- name: Use temporary no-auth config for initial bootstrap
-  ansible.builtin.template:
-    src: mongod_init.conf.j2
-    dest: /etc/mongod.conf
-    owner: "{{ mongo_service_user }}"
-    group: "{{ mongo_service_group }}"
-    mode: "0644"
-  notify:
-    - mongodb_restart
-    - wait_till_mongodb_started_on_localhost
-  when:
-  - mongodb_authentication_enabled | default(true)
-  - rep_initiate is failed
-  - mongodb_master_group in groups
-  - inventory_hostname in groups[mongodb_master_group]
-
-- name: Flush handlers to apply bootstrap config
-  ansible.builtin.meta: flush_handlers
-
-- name: Re-initiate the replica set without authentication
-  ansible.builtin.shell: >
-    /usr/bin/mongosh < /tmp/repset_init.js
-  changed_when: true
-  when:
-  - mongodb_authentication_enabled | default(true)
-  - rep_initiate is failed
-  - mongodb_master_group in groups
-  - inventory_hostname in groups[mongodb_master_group]
-
-- name: Wait for replica set to elect a primary
-  ansible.builtin.pause:
-    seconds: 15
-  when:
-  - mongodb_authentication_enabled | default(true)
-  - rep_initiate is failed
-  - mongodb_master_group in groups
-  - inventory_hostname in groups[mongodb_master_group]
-
-- name: Create HA users now that the replica set is initiated
-  ansible.builtin.include_tasks: users.yml
-  when:
-    - mongodb_authentication_enabled | default(true)
-    - rep_initiate is failed
-
-- name: Restore mongod.conf with authentication enabled
-  ansible.builtin.template:
-    src: mongod.conf.j2
-    dest: /etc/mongod.conf
-    owner: "{{ mongo_service_user }}"
-    group: "{{ mongo_service_group }}"
-    mode: "0644"
-  notify:
-    - mongodb_restart
-    - wait_till_mongodb_started
-  when:
-    - mongodb_authentication_enabled | default(true)
-    - rep_initiate is failed
-
-- name: Flush handlers to restore authenticated config
-  ansible.builtin.meta: flush_handlers
 
 - name: Validate replica set status
   ansible.builtin.shell: >
     /usr/bin/mongosh
-    {{ '--authenticationDatabase admin -u ' + mongo_root_admin_name + ' -p ' + mongo_root_admin_pwd if mongodb_authentication_enabled | default(true) else '' }}
+    --authenticationDatabase admin
+    -u {{ mongo_root_admin_name }}
+    -p {{ mongo_root_admin_pwd }}
     --quiet --eval "rs.status().members.forEach(m => print(m.name + ' -> ' + m.stateStr))"
   register: replica_status
   changed_when: false
-  no_log: true
+  no_log: false
   when:
   - mongodb_master_group in groups
   - inventory_hostname in groups[mongodb_master_group]

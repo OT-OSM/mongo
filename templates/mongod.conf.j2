@@ -16,8 +16,7 @@ net:
   port: {{ mongo_port }}
   bindIp: {{ mongo_bindIp }}
 
-{% if mongodb_authentication_enabled | default(true)
-      and not mongodb_bootstrap_mode | default(false) %}
+{% if mongodb_authentication_enabled | default(true) %}
 security:
   authorization: enabled
 {% if mongodb_replication | default(false) %}
