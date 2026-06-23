@@ -16,8 +16,7 @@ net:
   port: {{ mongo_port }}
   bindIp: {{ mongo_bindIp }}
 
-{% if mongodb_authentication_enabled | default(true)
-      and mongo_admin_marker_file.stat.exists | default(false) %}
+{% if mongodb_authentication_enabled | default(true) %}
 
 security:
   authorization: enabled
