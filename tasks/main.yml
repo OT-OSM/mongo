@@ -1,4 +1,8 @@
 ---
+- name: DEBUG ROLE VERSION
+  ansible.builtin.debug:
+    msg: "ROLE_VERSION_E2EE765"
+
 # ######################## #
 # Pre-requisites           #
 # DNS / hostname management #
