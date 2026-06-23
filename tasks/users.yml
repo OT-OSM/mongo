@@ -12,8 +12,7 @@
     - mongodb_master_group in groups
     - inventory_hostname in groups[mongodb_master_group]
 
-  run_once: true
-
+  
 # =============================================================================
 # MongoDB Users Setup — HA Users
 # =============================================================================
@@ -32,7 +31,7 @@
     - inventory_hostname in groups[mongodb_master_group]
     - not mongo_admin_marker.stat.exists
 
-  run_once: true
+  
   no_log: false
 
 # =============================================================================
@@ -56,7 +55,7 @@
   - inventory_hostname in groups[mongodb_master_group]
   - mongodb_authentication_enabled | default(true)
 
-  run_once: true
+  
   no_log: false
 
 # =============================================================================
@@ -82,5 +81,5 @@
   - inventory_hostname in groups[mongodb_master_group]
   - mongodb_authentication_enabled | default(true)
 
-  run_once: true
+  
   no_log: false

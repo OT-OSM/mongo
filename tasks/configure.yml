@@ -107,6 +107,11 @@
     - mongodb_authentication_enabled | default(true)
     - mongodb_replication | default(false)
 
+- name: Check if root admin marker exists
+  ansible.builtin.stat:
+    path: /var/lib/mongodb/.mongodb_admin_created
+  register: mongo_admin_marker_file
+
 # =====================================================
 # SECTION 3 — mongod.conf
 # =====================================================
