@@ -19,7 +19,7 @@ mongodb_root_password_update: false
 # =====================================================
 # Feature Toggles — HA / Add-on Components
 # =====================================================
-mongodb_arbiter_configure: false          # Add an arbiter node to the replica set
+mongodb_arbiter_configure: true          # Add an arbiter node to the replica set
 mongodb_metrics_enabled: true            # Install mongodb_exporter for Prometheus
 mongodb_pmm_enabled: false                # Register node with PMM server
 mongodb_minio_configure: false            # Install/configure mc client (for MinIO backups)
