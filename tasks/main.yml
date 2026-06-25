@@ -54,6 +54,14 @@
     - mongodb_authentication_enabled | default(true)
     - mongodb_custom_users_creation | default(true)
 
+- name: Debug arbiter variables
+  debug:
+    msg:
+      - "inventory_hostname={{ inventory_hostname }}"
+      - "group_names={{ group_names }}"
+      - "mongo_arbiter_group={{ mongodb_arbiter_group }}"
+      - "groups[mongo_arbiter]={{ groups[mongodb_arbiter_group] | default([]) }}"
+
 # ################################## #
 # HA — Arbiter                       #
 # Runs only on arbiter group         #
