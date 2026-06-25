@@ -46,6 +46,29 @@
     - create_user
   when: mongodb_authentication_enabled | default(true)
 
+- name: Configure MongoDB default read/write concern
+  ansible.builtin.shell: |
+    /usr/bin/mongosh \
+      --authenticationDatabase admin \
+      -u {{ mongo_root_admin_name }} \
+      -p {{ mongo_root_admin_pwd }} \
+      --quiet \
+      --eval '
+      db.adminCommand({
+        setDefaultRWConcern: 1,
+        defaultWriteConcern: { w: "majority" },
+        writeConcern: { w: "majority" }
+      })
+      '
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+  register: rw_concern
+  changed_when: false
+  failed_when: false
+  when:
+    - mongodb_replication | default(false)
+    - mongodb_authentication_enabled | default(true)
+    
 - name: Including tasks for custom database/user creation
   ansible.builtin.include_tasks: database.yml
   tags:
