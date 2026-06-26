@@ -1,0 +1,19 @@
+---
+- name: Configure MongoDB Default Read/Write Concern
+  ansible.builtin.shell: |
+    mongosh \
+      --authenticationDatabase admin \
+      -u {{ mongo_root_admin_name }} \
+      -p {{ mongo_root_admin_pwd }} \
+      --quiet \
+      --eval '
+      db.adminCommand({
+        setDefaultRWConcern:1,
+        defaultWriteConcern:{w:"majority"}
+      })
+      '
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+  register: rw_concern
+  changed_when: false
+  failed_when: false

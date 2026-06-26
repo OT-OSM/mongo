@@ -95,6 +95,12 @@
     - mongodb_arbiter_configure | default(false)
     - inventory_hostname in groups[mongodb_arbiter_group] | default([])
 
+- name: Configure MongoDB Read/Write Concern
+  ansible.builtin.include_tasks: rw_concern.yml
+  when:
+    - mongodb_replication | default(false)
+    - mongodb_authentication_enabled | default(true)
+
 # ################################## #
 # Metrics — mongodb_exporter          #
 # ################################## #
