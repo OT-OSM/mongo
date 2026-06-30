@@ -170,7 +170,7 @@ mongodb_ha_mc_install_path: /usr/local/bin/mc
 
 mongodb_ha_minio_alias: mongo-minio
 
-mongodb_ha_minio_endpoint: "https://minio.ldc.opstree.dev:8443"
+mongodb_ha_minio_endpoint: "https://minio.ldc.opstree.dev"
 
 mongodb_ha_minio_root_user: "minioadmin"
 
