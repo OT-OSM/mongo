@@ -42,3 +42,10 @@ echo "MinIO upload successful"
 rm -f "${ARCHIVE}"
 
 echo "Backup completed successfully"
+
+# Verify upload
+{{ mongodb_ha_mc_install_path }} stat \
+  "{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${DAY_DIR}/mongodump_${TIMESTAMP}.archive.gz" \
+  --insecure
+
+echo "MinIO upload verified successfully"
