@@ -119,6 +119,14 @@
     - pmm
   when: mongodb_pmm_enabled | default(false)
 
+- name: Debug MinIO variables
+  ansible.builtin.debug:
+    msg:
+      - "mongodb_minio_configure={{ mongodb_minio_configure }}"
+      - "mongodb_deploy_backup_scripts={{ mongodb_deploy_backup_scripts }}"
+      - "mongodb_backup_server={{ mongodb_backup_server }}"
+      - "mongodb_ha_backup_storage={{ mongodb_ha_backup_storage }}"
+
 # ################################## #
 # MinIO Client                       #
 # Required for backup and restore    #
