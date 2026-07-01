@@ -1,0 +1,29 @@
+# =============================================================================
+# Percona Backup for MongoDB Storage Configuration
+# Managed by Ansible
+# =============================================================================
+
+storage:
+  type: s3
+
+  s3:
+    endpointUrl: "{{ mongodb_pbm_s3_endpoint }}"
+    bucket: "{{ mongodb_pbm_bucket }}"
+    region: "{{ mongodb_pbm_region }}"
+    forcePathStyle: true
+
+    credentials:
+      access-key-id: "{{ mongodb_pbm_s3_access_key }}"
+      secret-access-key: "{{ mongodb_pbm_s3_secret_key }}"
+
+    insecureSkipTLSVerify: {{ mongodb_pbm_tls_skip_verify | lower }}
+
+pitr:
+  enabled: true
+  compression: s2
+
+backup:
+  compression: s2
+  oplogSpanMin: 10
+
+restore: {}

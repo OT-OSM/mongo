@@ -1,0 +1,6 @@
+# =============================================================================
+# Percona Backup for MongoDB (PBM)
+# Managed by Ansible
+# =============================================================================
+
+PBM_MONGODB_URI="mongodb://{{ mongodb_pbm_user }}:{{ mongodb_pbm_password }}@127.0.0.1:27017/?replicaSet={{ mongo_replSetName }}&authSource=admin"

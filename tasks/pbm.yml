@@ -1,0 +1,109 @@
+---
+# =============================================================================
+# Percona Backup for MongoDB (PBM)
+# =============================================================================
+
+- name: Install Percona repository package
+  ansible.builtin.apt:
+    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+  when: ansible_os_family == "Debian"
+
+- name: Enable PBM repository
+  ansible.builtin.command: percona-release enable pbm release
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == "Debian"
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Install PBM package
+  ansible.builtin.package:
+    name: percona-backup-mongodb
+    state: present
+  when: inventory_hostname in (groups[mongodb_master_group] + groups[mongodb_slave_group])
+
+- name: Create PBM user
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongo_root_admin_name }} -p {{ mongo_root_admin_pwd }} --authenticationDatabase admin <<'EOF'
+    use admin
+    if (!db.getUser("{{ mongodb_pbm_user }}")) {
+      db.createUser({
+        user: "{{ mongodb_pbm_user }}",
+        pwd: "{{ mongodb_pbm_password }}",
+        roles: [
+          { role: "backup", db: "admin" },
+          { role: "restore", db: "admin" },
+          { role: "clusterMonitor", db: "admin" }
+        ]
+      })
+    }
+    EOF
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+  changed_when: false
+
+- name: Deploy PBM agent config
+  ansible.builtin.template:
+    src: pbm-agent.j2
+    dest: /etc/default/pbm-agent
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart PBM Agent
+  when: inventory_hostname in (groups[mongodb_master_group] + groups[mongodb_slave_group])
+
+- name: Deploy PBM storage config
+  ansible.builtin.template:
+    src: pbm-storage.conf.j2
+    dest: /etc/pbm-storage.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart PBM Agent
+  when: inventory_hostname in (groups[mongodb_master_group] + groups[mongodb_slave_group])
+
+- name: Enable PBM service
+  ansible.builtin.systemd:
+    name: pbm-agent
+    enabled: true
+    daemon_reload: true
+  when: inventory_hostname in (groups[mongodb_master_group] + groups[mongodb_slave_group])
+
+- name: Start PBM service
+  ansible.builtin.systemd:
+    name: pbm-agent
+    state: started
+  when: inventory_hostname in (groups[mongodb_master_group] + groups[mongodb_slave_group])
+
+- name: Configure PBM storage
+  ansible.builtin.command: >
+    pbm config --file /etc/pbm-storage.conf
+    --mongodb-uri=mongodb://{{ mongodb_pbm_user }}:{{ mongodb_pbm_password }}@127.0.0.1:27017/?authSource=admin
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+  changed_when: false
+  when: inventory_hostname == groups[mongodb_master_group][0]
+
+- name: Enable PITR
+  ansible.builtin.command: >
+    pbm config --set pitr.enabled=true
+    --mongodb-uri=mongodb://{{ mongodb_pbm_user }}:{{ mongodb_pbm_password }}@127.0.0.1:27017/?authSource=admin
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+  changed_when: false
+  when: inventory_hostname == groups[mongodb_master_group][0]
+
+- name: Weekly PBM backup
+  ansible.builtin.cron:
+    name: PBM Weekly Backup
+    weekday: "0"
+    hour: "1"
+    minute: "0"
+    user: root
+    job: pbm backup --mongodb-uri=mongodb://{{ mongodb_pbm_user }}:{{ mongodb_pbm_password }}@127.0.0.1:27017/?authSource=admin
+  when: inventory_hostname == groups[mongodb_master_group][0]

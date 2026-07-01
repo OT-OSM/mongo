@@ -5,7 +5,15 @@
 set -euo pipefail
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-DAY_DIR=$(date +%Y-%m-%d)
+# Current timestamp
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# Weekly folder (Sunday's date)
+if [ "$(date +%u)" -eq 7 ]; then
+    WEEK_FOLDER=$(date +%F)
+else
+    WEEK_FOLDER=$(date -d "last sunday" +%F)
+fi
 ARCHIVE="/tmp/mongodump_${TIMESTAMP}.archive.gz"
 
 /usr/bin/mongodump \
@@ -34,8 +42,8 @@ fi
 echo "Backup archive created successfully"
 
 {{ mongodb_ha_mc_install_path }} cp "${ARCHIVE}" \
-  "{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${DAY_DIR}/mongodump_${TIMESTAMP}.archive.gz" \
-  --insecure
+"{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${WEEK_FOLDER}/full/mongodump_${TIMESTAMP}.archive.gz" \
+--insecure
 
 echo "MinIO upload successful"
 
@@ -44,8 +52,8 @@ rm -f "${ARCHIVE}"
 echo "Backup completed successfully"
 
 # Verify upload
-{{ mongodb_ha_mc_install_path }} stat \
-  "{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${DAY_DIR}/mongodump_${TIMESTAMP}.archive.gz" \
-  --insecure
+{{ mongodb_ha_mc_install_path }} cp "${ARCHIVE}" \
+"{{ mongodb_ha_minio_alias }}/{{ mongodb_ha_minio_bucket }}/${WEEK_FOLDER}/full/mongodump_${TIMESTAMP}.archive.gz" \
+--insecure
 
 echo "MinIO upload verified successfully"

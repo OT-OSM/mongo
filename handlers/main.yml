@@ -34,3 +34,8 @@
     delay: 5
     timeout: 120
   listen: wait_till_mongodb_started_on_localhost
+
+- name: Restart PBM Agent
+  ansible.builtin.systemd:
+    name: pbm-agent
+    state: restarted
