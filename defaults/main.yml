@@ -21,10 +21,6 @@ mongodb_root_password_update: false
 # =====================================================
 mongodb_arbiter_configure: true          # Add an arbiter node to the replica set
 mongodb_metrics_enabled: true            # Install mongodb_exporter for Prometheus
-# mongodb_minio_configure: true            # Install/configure mc client (for MinIO backups)
-# mongodb_deploy_backup_scripts: true      # Deploy mongodump backup scripts
-# mongodb_setup_backup_cron: true          # Enable backup cron jobs
-# mongodb_backup_server: false              # Mark this node as the backup server
 mongodb_deploy_failover_script: true     # Deploy post-failover resync helper script
 
 # =====================================================
@@ -131,30 +127,6 @@ mongodb_exporter_db_password: "{{ mongo_root_backup_pwd }}"
 mongodb_exporter_download_url: "https://github.com/percona/mongodb_exporter/releases/download/v{{ mongodb_exporter_version }}/mongodb_exporter-{{ mongodb_exporter_version }}.linux-amd64.tar.gz"
 
 # =====================================================
-# Backup Settings — mongodump based
-# =====================================================
-mongodb_ha_backup_storage: "minio"            # minio | local
-mongodb_ha_backup_log_file: /var/log/mongodb-backup.log
-mongodb_ha_backup_scripts_path: /usr/local/bin
-mongodb_ha_backup_full_retention_days: 7
-mongodb_ha_local_backup_path: /var/backup/mongodb
-mongodb_ha_local_backup_owner: root
-mongodb_ha_local_backup_group: root
-mongodb_ha_local_backup_mode: "0750"
-
-mongodb_ha_backup_full_cron_minute: "0"
-mongodb_ha_backup_full_cron_hour: "1"
-mongodb_ha_backup_full_cron_weekday: "*"
-
-# Oplog Backup
-mongodb_ha_oplog_backup_enabled: true
-
-mongodb_ha_oplog_backup_cron_minute: "*/30"
-mongodb_ha_oplog_backup_cron_hour: "*"
-
-mongodb_ha_oplog_backup_retention_days: 2
-
-# =====================================================
 # MinIO Client (mc) — used for backup uploads
 # =====================================================
 mongodb_ha_mc_install_path: /usr/local/bin/mc
@@ -224,3 +196,16 @@ mongodb_pbm_s3_access_key: minioadmin
 mongodb_pbm_s3_secret_key: changeme
 
 mongodb_pbm_tls_skip_verify: true
+
+# =============================================================================
+# Node Exporter
+# =============================================================================
+mongodb_node_exporter_enabled: true
+
+node_exporter_version: "1.11.1"
+
+node_exporter_user: "node_exporter"
+
+node_exporter_download_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+
+node_exporter_port: 9100

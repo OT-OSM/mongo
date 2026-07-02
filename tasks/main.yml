@@ -103,30 +103,13 @@
   when: mongodb_metrics_enabled | default(false)
 
 # ################################## #
-# MinIO Client                       #
-# Required for backup and restore    #
-# Only when backup_storage is minio  #
+# Metrics — node_exporter
 # ################################## #
-# - name: Including tasks for MinIO Client Installation
-#  ansible.builtin.include_tasks: minio.yml
-#  when:
-#    - mongodb_ha_backup_storage | default("minio") == "minio"
-#    - mongodb_minio_configure | default(false)
-
-# ################################## #
-# Backup Scripts                     #
-# Storage type controlled by         #
-# mongodb_ha_backup_storage toggle:   #
-#   minio — streams to MinIO         #
-#   local — stores on local disk     #
-# ################################## #
-# - name: Including tasks for HA Backup Scripts
-#  ansible.builtin.include_tasks: backup_scripts.yml
-#  tags:
-#    - backup_scripts
-#  when: >
-#    mongodb_deploy_backup_scripts | default(false) or
-#    mongodb_backup_server | default(false)
+- name: Including tasks for node_exporter
+  ansible.builtin.include_tasks: node_exporter.yml
+  tags:
+    - node_exporter
+  when: mongodb_node_exporter_enabled | default(true)
 
 # ################################## #
 # Post-Failover Resync Script        #
