@@ -129,6 +129,8 @@ mongodb_exporter_download_url: "https://github.com/percona/mongodb_exporter/rele
 # =====================================================
 # MinIO Client (mc) — used for backup uploads
 # =====================================================
+mongodb_ha_backup_storage: "minio"
+
 mongodb_ha_mc_install_path: /usr/local/bin/mc
 
 mongodb_ha_minio_alias: mongo-minio
