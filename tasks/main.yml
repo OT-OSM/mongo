@@ -117,16 +117,6 @@
     - node_exporter
   when: mongodb_node_exporter_enabled | default(true)
 
-# ################################## #
-# Post-Failover Resync Script        #
-# Runs only on the backup server     #
-# ################################## #
-- name: Including tasks for Post-Failover Script
-  ansible.builtin.include_tasks: post_failover_script.yml
-  tags:
-    - failover_script
-  when: mongodb_deploy_failover_script | default(false)
-
 # ##################################
 # Percona Backup for MongoDB (PBM)
 # ##################################

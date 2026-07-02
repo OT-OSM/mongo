@@ -21,7 +21,6 @@ mongodb_root_password_update: false
 # =====================================================
 mongodb_arbiter_configure: true          # Add an arbiter node to the replica set
 mongodb_metrics_enabled: true            # Install mongodb_exporter for Prometheus
-mongodb_deploy_failover_script: true     # Deploy post-failover resync helper script
 
 # =====================================================
 # Inventory Group Names
@@ -129,7 +128,6 @@ mongodb_exporter_download_url: "https://github.com/percona/mongodb_exporter/rele
 # =====================================================
 # MinIO Client (mc) — used for backup uploads
 # =====================================================
-mongodb_ha_backup_storage: "minio"
 
 mongodb_ha_mc_install_path: /usr/local/bin/mc
 
@@ -146,19 +144,6 @@ mongodb_ha_minio_bucket: "mongodb-backup"
 mongodb_ha_minio_resync_folder: failover-resync
 
 # =====================================================
-# Post-Failover Resync Script
-# =====================================================
-mongodb_ha_failover_script_path: /usr/local/bin/post-failover-action.sh
-
-mongodb_restore_enabled: false
-
-mongodb_arbiter_enabled: false
-
-mongodb_backup_verify: true
-
-mongodb_restore_directory: /tmp/mongodb_restore
-
-# =====================================================
 # Security Hardening
 # =====================================================
 
@@ -171,9 +156,6 @@ mongodb_tls_ca_file: /etc/ssl/mongodb/ca.pem
 
 mongodb_ha_slack_webhook_url: ""
 mongodb_ha_alert_email: ""
-
-mongodb_ha_failover_max_restart_wait: 300
-mongodb_ha_failover_retry_interval: 15
 
 # =============================================================================
 # Percona Backup for MongoDB (PBM)
