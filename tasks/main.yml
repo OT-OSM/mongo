@@ -102,6 +102,12 @@
     - mongodb_metrics
   when: mongodb_metrics_enabled | default(false)
 
+- name: Debug node exporter variable
+  ansible.builtin.debug:
+    msg:
+      - "mongodb_node_exporter_enabled={{ mongodb_node_exporter_enabled }}"
+      - "inventory_hostname={{ inventory_hostname }}"
+
 # ################################## #
 # Metrics — node_exporter
 # ################################## #
