@@ -96,25 +96,6 @@ mongo_root_backup_name: backupuser
 mongo_root_backup_pwd: changeme
 mongo_custom_users: None
 
-mongo_authentication_keyname: mongo_authentication_key
-mongo_authentication_key: |
-  PJVTQtjMfnYmE4TrQkCLVgJzUCh09HWTRvbVhbOn+J/paZS6LXQeESHWfBX5WPBM
-  o1TkLLyBLun7WerGlX48GFyMWb/KJqd+Zx+WaKskjjz4z16SgFLVqmvsgufiMEBb
-  L8YgL11z2TVmaFYFOF/+5vvkhQ14F7Joqhaotp43g2lO9sNDlHZSq1SVmOBZWhCu
-  brg9cOPaGrwzwl84EFr8hXTnwHD+CeRbVy0HgMX+rjOw2m+vdcIAlSBDBRGyNuj2
-  CPAVfc9S2eyOqIjvTvfxUVJFPnQDdPtadoBt/f4ukDjU9JbiKt7oxXBf2oc3iicN
-  qAwFBXJiCrlPZQ6qUyPfnb4wVe44JO1ktRlMlj2shf470mF1OienE2VT8HYUCJjr
-  7gt75n3SG9M0PGKMeO2VC7myVyYephaxjw9cRVe/KzNkw+b3A8SGI9/urWmCkre2
-  tjl2u0ZpfJmFAC88MFs7xJUwUQ8e2DFHlv79XgpW+MO22SF3dc15/rCVi2GKdq8i
-  Pm3Bs4psUYC0781ilXl5JawFhAYnUJ7zqqvXDBrjClLOC+9DVq7JkKGcl5W66Vpt
-  Pdr2yLr9kG+4GJ8slSmJcR3W8m/Vl7h614XIPEbgBFDL7k59s06yDZM9y1tVHy54
-  eZnzFVdpAacALu2ma3WAkR2GtiVZTG7iJGT2L//6frjO2oAXPS49Kd9tylhUIsqx
-  VGosBKne/O0FCzjLOARpz8JjIojJcwQpIGJadY5gHHrfX22ppfg9xCnuZiMsG3mj
-  7yruN7PaZ0iMh999zdUFfSThDYnKVY6zqgTss8d8nJrNNyZH2yJMBQ753Uzs9PrX
-  o/GJ0QG6+9cehU2x3lIWVWrziCLRiC4LRCdM7ZVXLJ94eEX5tjdPmtM2LDdlQVQL
-  VWDz+m8uH1N6XHC/DGXr8ZRD87uP3IgWMVqJwFhLd6DRDmlD57yqegN0TzjL0Vu8
-  nnPvit/r0ExF9yfqxTxsuYOiRT8O629UDe6Bvid6I4tOR/XQ
-
 # =====================================================
 # Prometheus Exporter (mongodb_exporter)
 # =====================================================
@@ -123,7 +104,6 @@ mongodb_exporter_user: mongodb_exporter
 mongodb_exporter_port: 9216
 mongodb_exporter_db_user: "{{ mongo_root_backup_name }}"
 mongodb_exporter_db_password: "{{ mongo_root_backup_pwd }}"
-mongodb_exporter_download_url: "https://github.com/percona/mongodb_exporter/releases/download/v{{ mongodb_exporter_version }}/mongodb_exporter-{{ mongodb_exporter_version }}.linux-amd64.tar.gz"
 
 # =====================================================
 # MinIO Client (mc) — used for backup uploads
@@ -189,7 +169,5 @@ mongodb_node_exporter_enabled: true
 node_exporter_version: "1.11.1"
 
 node_exporter_user: "node_exporter"
-
-node_exporter_download_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
 
 node_exporter_port: 9100
