@@ -1,0 +1,32 @@
+---
+- name: Check if arbiter already exists
+  ansible.builtin.shell: |
+    mongosh --quiet \
+    --authenticationDatabase admin \
+    -u {{ mongo_root_admin_name }} \
+    -p {{ mongo_root_admin_pwd }} \
+    --eval '
+      var members = rs.conf().members;
+      var found = members.some(
+        m => m.host.indexOf("{{ hostvars[groups[mongodb_arbiter_group][0]].ansible_host | default(groups[mongodb_arbiter_group][0]) }}") >= 0
+      );
+      print(found);
+    '
+  register: arbiter_exists
+  changed_when: false
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+
+- name: Add arbiter node
+  ansible.builtin.shell: |
+    mongosh \
+    --authenticationDatabase admin \
+    -u {{ mongo_root_admin_name }} \
+    -p {{ mongo_root_admin_pwd }} \
+    --eval '
+      rs.addArb("{{ hostvars[groups[mongodb_arbiter_group][0]].ansible_host | default(groups[mongodb_arbiter_group][0]) }}:{{ mongo_port }}")
+    '
+  when:
+    - arbiter_exists.stdout == "false"
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true

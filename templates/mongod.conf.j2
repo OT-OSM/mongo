@@ -1,0 +1,30 @@
+# mongod.conf — managed by Ansible (mongodb_server role)
+
+systemLog:
+  destination: {{ mongo_systemlog_destination }}
+  logAppend: true
+  path: {{ mongo_systemlog_path }}
+
+storage:
+  dbPath: {{ mongo_db_path }}
+
+operationProfiling:
+  slowOpThresholdMs: {{ mongodb_slow_op_threshold_ms }}
+  mode: {{ mongodb_profiling_mode }}
+
+net:
+  port: {{ mongo_port }}
+  bindIp: {{ mongo_bindIp }}
+
+{% if mongodb_authentication_enabled | default(true) %}
+security:
+  authorization: enabled
+{% if mongodb_replication | default(false) %}
+  keyFile: /etc/{{ mongo_authentication_keyname }}
+{% endif %}
+{% endif %}
+
+{% if mongodb_replication | default(false) %}
+replication:
+  replSetName: {{ mongo_replSetName }}
+{% endif %}

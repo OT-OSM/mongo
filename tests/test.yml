@@ -1,0 +1,5 @@
+---
+- hosts: mongo
+  remote_user: root
+  roles:
+    - mongodb_server

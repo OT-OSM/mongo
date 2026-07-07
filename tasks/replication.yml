@@ -1,0 +1,51 @@
+# =============================================================================
+# Replication Setup — Replica Set (Primary/Secondary)
+# Flow:
+#   1. Initiate the replica set from the primary using rs.initiate()
+#   2. If authentication is enabled, the very first run will fail because no
+#      users exist yet — in that case, switch to a temporary no-auth config,
+#      create the HA users, then re-run rs.initiate() and switch back.
+# =============================================================================
+
+- name: Place replica set initiate script on primary node
+  ansible.builtin.template:
+    src: repset_init.js.j2
+    dest: /tmp/repset_init.js
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
+
+- name: Initiate the replica set
+  ansible.builtin.shell: >
+    /usr/bin/mongosh < /tmp/repset_init.js
+  register: rep_initiate
+  changed_when: "'ok' in rep_initiate.stdout"
+  ignore_errors: true
+  no_log: false
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
+
+- name: Validate replica set status
+  ansible.builtin.shell: >
+    /usr/bin/mongosh
+    {% if mongodb_authentication_enabled | default(true) %}
+    -u {{ mongo_root_admin_name }}
+    -p '{{ mongo_root_admin_pwd }}'
+    --authenticationDatabase admin
+    {% endif %}
+    --quiet
+    --eval "rs.status().members.forEach(m => print(m.name + ' -> ' + m.stateStr))"
+  register: replica_status
+  changed_when: false
+  no_log: false
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group]
+
+- name: Display replica set status
+  ansible.builtin.debug:
+    var: replica_status.stdout_lines
+  when:
+  - mongodb_master_group in groups
+  - inventory_hostname in groups[mongodb_master_group] 

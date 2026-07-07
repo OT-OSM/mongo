@@ -1,0 +1,18 @@
+# =============================================================================
+# Pre-requisites — DNS resolution and hostname management
+# Ensures every MongoDB node can resolve every other node by inventory name,
+# required for replica set member configuration.
+# =============================================================================
+
+- name: Configuring the MongoDB node DNS in /etc/hosts
+  ansible.builtin.blockinfile:
+    block: |
+      {{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ item }}
+    path: /etc/hosts
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+  with_items: "{{ groups['mongo'] | default([]) }}"
+
+- name: Setting up hostname of MongoDB nodes
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  when: false

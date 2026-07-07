@@ -1,15 +1,122 @@
 ---
-# tasks file for mongodb
 
-- name: Include playbook for mongo os configurations
-  include_tasks: pre-requistes.yml
+# ######################## #
+# Pre-requisites           #
+# DNS / hostname management #
+# ######################## #
+- name: Including tasks for pre-requisites
+  ansible.builtin.include_tasks: pre_requisites.yml
 
-- name: To install mongo on Debian
-  include_tasks: debian.yml
+# ######################## #
+# MongoDB Installation      #
+# ######################## #
+- name: Including tasks for Installation of MongoDB
+  ansible.builtin.include_tasks: Ubuntu.yml
   when:
-    ansible_os_family == 'Debian'
+    - mongodb_install_packages | default(true)
+    - ansible_os_family == 'Debian'
 
-- name: To install mongo on Redhat
-  include_tasks: redhat.yml
+- name: Including tasks for Installation of MongoDB
+  ansible.builtin.include_tasks: Redhat.yml
   when:
-    ansible_os_family == 'RedHat'
+    - mongodb_install_packages | default(true)
+    - ansible_os_family == 'RedHat'
+
+# ######################## #
+# MongoDB Configuration     #
+# ######################## #
+- name: Including tasks for Configuring MongoDB
+  ansible.builtin.include_tasks: configure.yml
+
+
+# ############################# #
+# MongoDB Replication Setup
+# ############################# #
+- name: Including tasks for Replication Setup
+  ansible.builtin.include_tasks: replication.yml
+  when: mongodb_replication | default(false)
+
+
+# ############################# #
+# MongoDB User and DB Operation  #
+# ############################# #
+- name: Including tasks for HA user creation
+  ansible.builtin.include_tasks: users.yml
+  tags:
+    - create_user
+  when: mongodb_authentication_enabled | default(true)
+
+- name: Configure MongoDB default read/write concern
+  ansible.builtin.shell: |
+    /usr/bin/mongosh \
+      --authenticationDatabase admin \
+      -u {{ mongo_root_admin_name }} \
+      -p {{ mongo_root_admin_pwd }} \
+      --quiet \
+      --eval '
+      db.adminCommand({
+        setDefaultRWConcern: 1,
+        defaultWriteConcern: { w: "majority" },
+        writeConcern: { w: "majority" }
+      })
+      '
+  delegate_to: "{{ groups[mongodb_master_group][0] }}"
+  run_once: true
+  register: rw_concern
+  changed_when: false
+  failed_when: false
+  when:
+    - mongodb_replication | default(false)
+    - mongodb_authentication_enabled | default(true)
+    
+- name: Including tasks for custom database/user creation
+  ansible.builtin.include_tasks: database.yml
+  tags:
+    - create_database
+  when:
+    - mongodb_authentication_enabled | default(true)
+    - mongodb_custom_users_creation | default(true)
+
+# ################################## #
+# HA — Arbiter                       #
+# Runs only on arbiter group         #
+# ################################## #
+- name: Including tasks for Arbiter configuration
+  ansible.builtin.include_tasks: arbiter.yml
+  when:
+    - mongodb_arbiter_configure | default(false)
+    - inventory_hostname in groups[mongodb_arbiter_group] | default([])
+
+- name: Configure MongoDB Read/Write Concern
+  ansible.builtin.include_tasks: rw_concern.yml
+  when:
+    - mongodb_replication | default(false)
+    - mongodb_authentication_enabled | default(true)
+
+# ################################## #
+# Metrics — mongodb_exporter          #
+# ################################## #
+- name: Including tasks for mongodb_exporter
+  ansible.builtin.include_tasks: mongodb_metrics.yml
+  tags:
+    - mongodb_metrics
+  when: mongodb_metrics_enabled | default(false)
+
+# ################################## #
+# Metrics — node_exporter
+# ################################## #
+- name: Including tasks for node_exporter
+  ansible.builtin.include_tasks: node_exporter.yml
+  tags:
+    - node_exporter
+  when: mongodb_node_exporter_enabled | default(true)
+
+# ##################################
+# Percona Backup for MongoDB (PBM)
+# ##################################
+
+- name: Including tasks for PBM Backup
+  ansible.builtin.include_tasks: pbm.yml
+  tags:
+    - pbm
+  when: mongodb_pbm_enabled | default(false)
